@@ -17,14 +17,14 @@ type Lobby interface {
 }
 
 type RoomManager struct {
-	sessioins map[string]*Room
+	Sessions map[string]*Room
 }
 
 // NewRoomManager creates a new RoomManager instance.
 //
 // Returns a pointer to the created RoomManager.
 func NewRoomManager() *RoomManager {
-	return &RoomManager{sessioins: map[string]*Room{}}
+	return &RoomManager{Sessions: map[string]*Room{}}
 }
 
 // ShowSessions returns the map of room sessions.
@@ -32,7 +32,7 @@ func NewRoomManager() *RoomManager {
 // No parameters.
 // Returns a map of string keys to Room values.
 func (RoomManager *RoomManager) ShowSessions() map[string]*Room {
-	return RoomManager.sessioins
+	return RoomManager.Sessions
 }
 
 // CreateRoom adds a new room with the given ID to the RoomManager's sessions.
@@ -40,7 +40,7 @@ func (RoomManager *RoomManager) ShowSessions() map[string]*Room {
 // Parameters:
 // - id: string representing the ID of the new room.
 func (RoomManager *RoomManager) CreateRoom(id string) {
-	RoomManager.sessioins[id] = NewRoom(id)
+	RoomManager.Sessions[id] = NewRoom(id)
 }
 
 // RemoveRoom removes a room from the RoomManager by ID.
@@ -48,7 +48,7 @@ func (RoomManager *RoomManager) CreateRoom(id string) {
 // Parameters:
 // - id: string representing the ID of the room to be removed.
 func (RoomManager *RoomManager) RemoveRoom(id string) {
-	delete(RoomManager.sessioins, id)
+	delete(RoomManager.Sessions, id)
 }
 
 // AddUserToRoom adds a user to a room in the RoomManager.
@@ -58,11 +58,11 @@ func (RoomManager *RoomManager) RemoveRoom(id string) {
 // - room_id: string representing the room ID.
 // - socket: *websocket.Conn for the user's socket connection.
 func (RoomManager *RoomManager) AddUserToRoom(self_id string, room_id string, socket *websocket.Conn) {
-	if _, ok := RoomManager.sessioins[room_id]; !ok {
+	if _, ok := RoomManager.Sessions[room_id]; !ok {
 		log.Println("New Room was created: ", room_id)
 		RoomManager.CreateRoom(room_id)
 	}
-	if room, ok := RoomManager.sessioins[room_id]; ok {
+	if room, ok := RoomManager.Sessions[room_id]; ok {
 		// Add Peer to Room
 		room.AddPeer(newPeer(self_id))
 		log.Println("Peer ", self_id, "was added to room ", room_id)
@@ -141,7 +141,7 @@ func (RoomManager *RoomManager) AddUserToRoom(self_id string, room_id string, so
 // - self_id: string
 // - room_id: string
 func (RoomManager *RoomManager) RemoveUserFromRoom(self_id string, room_id string) {
-	if room, ok := RoomManager.sessioins[room_id]; ok {
+	if room, ok := RoomManager.Sessions[room_id]; ok {
 		if _, ok := room.peers[self_id]; ok {
 			delete(room.peers, self_id)
 		}
@@ -181,7 +181,7 @@ func (RoomManager *RoomManager) ObtainEvent(message WsMessage, socket *websocket
 				self_id, _ := m["self_id"].(string)
 				room_id, _ := m["room_id"].(string)
 				offer2 := m["offer"].(map[string]any)
-				if room, ok := RoomManager.sessioins[room_id]; ok {
+				if room, ok := RoomManager.Sessions[room_id]; ok {
 					if peer, ok := room.peers[self_id]; ok {
 						answer, err2 := peer.ReactOnOffer(offer2["sdp"].(string))
 						if err2 != nil {
@@ -200,7 +200,7 @@ func (RoomManager *RoomManager) ObtainEvent(message WsMessage, socket *websocket
 				self_id, _ := m["self_id"].(string)
 				room_id, _ := m["room_id"].(string)
 				offer2 := m["answer"].(map[string]any)
-				if room, ok := RoomManager.sessioins[room_id]; ok {
+				if room, ok := RoomManager.Sessions[room_id]; ok {
 					if peer, ok := room.peers[self_id]; ok {
 						err := peer.ReactOnAnswer(offer2["sdp"].(string))
 						if err != nil {
@@ -234,7 +234,7 @@ func (RoomManager *RoomManager) ObtainEvent(message WsMessage, socket *websocket
 					SDPMLineIndex:    &sdp_m_line_index,
 					UsernameFragment: &username_fragment,
 				}
-				if room, ok := RoomManager.sessioins[room_id]; ok {
+				if room, ok := RoomManager.Sessions[room_id]; ok {
 					if peer, ok := room.peers[self_id]; ok {
 						if err := peer.connection.AddICECandidate(init); err != nil {
 							log.Println(err)
@@ -254,6 +254,4 @@ func (RoomManager *RoomManager) ObtainEvent(message WsMessage, socket *websocket
 		log.Println("DEFAULT")
 		log.Println(wsMessage)
 	}
-
-	return
 }

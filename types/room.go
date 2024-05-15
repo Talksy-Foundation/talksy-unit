@@ -26,6 +26,12 @@ type Room struct {
 	tracks map[string]*webrtc.TrackLocalStaticRTP
 }
 
+// NewRoom creates a new Room instance with the given ID.
+//
+// Parameters:
+//   id: The unique identifier for the Room.
+// Return type:
+//   *Room: The newly created Room instance.
 func NewRoom(id string) *Room {
 	return &Room{
 		id:     id,
@@ -35,6 +41,10 @@ func NewRoom(id string) *Room {
 	}
 }
 
+// AddPeer adds a peer to the Room instance.
+//
+// Parameters:
+//     peer: The peer to be added.
 func (room *Room) AddPeer(peer *Peer) {
 	room.mutex.Lock()
 	defer func() {
@@ -44,6 +54,10 @@ func (room *Room) AddPeer(peer *Peer) {
 	room.peers[peer.id] = peer
 }
 
+// RemovePeer removes a peer from the Room instance.
+//
+// Parameters:
+//     peer_id: The ID of the peer to be removed.
 func (room *Room) RemovePeer(peer_id string) {
 	room.mutex.Lock()
 	defer func() {
@@ -54,6 +68,12 @@ func (room *Room) RemovePeer(peer_id string) {
 	delete(room.peers, peer_id)
 }
 
+// AddTrack adds a track to the Room instance.
+//
+// Parameters:
+//     track: The track to be added.
+// Return type:
+//     *webrtc.TrackLocalStaticRTP: The locally added static RTP track.
 func (room *Room) AddTrack(track *webrtc.TrackRemote) *webrtc.TrackLocalStaticRTP {
 	room.mutex.Lock()
 	defer func() {
@@ -70,6 +90,10 @@ func (room *Room) AddTrack(track *webrtc.TrackRemote) *webrtc.TrackLocalStaticRT
 	return trackLocal
 }
 
+// RemoveTrack removes a track from the Room instance.
+//
+// Parameters:
+//     track: The track to be removed.
 func (room *Room) RemoveTrack(track *webrtc.TrackLocalStaticRTP) {
 	room.mutex.Lock()
 	defer func() {
@@ -80,6 +104,11 @@ func (room *Room) RemoveTrack(track *webrtc.TrackLocalStaticRTP) {
 	delete(room.tracks, track.ID())
 }
 
+// SendAnswer sends an answer message to a specific peer in the room.
+//
+// Parameters:
+//     message: The WebRTC session description to send.
+//     peer_id: The ID of the peer to send the answer to.
 func (room *Room) SendAnswer(message webrtc.SessionDescription, peer_id string) {
 	if peer, ok := room.peers[peer_id]; ok {
 		raw, parse_err := json.Marshal(message)
@@ -90,6 +119,11 @@ func (room *Room) SendAnswer(message webrtc.SessionDescription, peer_id string) 
 	}
 }
 
+// SendOffer sends an offer message to a specific peer in the room.
+//
+// Parameters:
+//     message: The WebRTC session description to send.
+//     peer_id: The ID of the peer to send the offer to.
 func (room *Room) SendOffer(message webrtc.SessionDescription, peer_id string) {
 	if peer, ok := room.peers[peer_id]; ok {
 		raw, parse_err := json.Marshal(message)
@@ -100,6 +134,11 @@ func (room *Room) SendOffer(message webrtc.SessionDescription, peer_id string) {
 	}
 }
 
+// SendICE sends an ICE candidate message to a specific peer in the room.
+//
+// Parameters:
+//     message: The ICE candidate to send.
+//     peer_id: The ID of the peer to send the ICE candidate to.
 func (room *Room) SendICE(message *webrtc.ICECandidate, peer_id string) {
 	if peer, ok := room.peers[peer_id]; ok {
 		log.Println("SENDED |ICE|: ", message.ToJSON())
@@ -111,7 +150,12 @@ func (room *Room) SendICE(message *webrtc.ICECandidate, peer_id string) {
 	}
 }
 
-func (room *Room) BroadCast(message WsMessage, self_id string) {
+// Broadcast sends a message to all peers in the room except the sender.
+//
+// Parameters:
+//     message: The message to broadcast.
+//     self_id: The ID of the sender.
+func (room *Room) Broadcast(message WsMessage, self_id string) {
 	room.mutex.Lock()
 	defer room.mutex.Unlock()
 	for _, rec := range room.peers {
@@ -123,12 +167,20 @@ func (room *Room) BroadCast(message WsMessage, self_id string) {
 	}
 }
 
+// JoinRoom adds a peer with the given ID to the Room instance.
+//
+// Parameters:
+//     id: The ID of the peer to be added.
 func (room *Room) JoinRoom(id string) {
 	room.mutex.Lock()
 	defer room.mutex.Unlock()
 	room.peers[id] = newPeer(id)
 }
 
+// Signal synchronizes the signaling process for all peers in the room.
+//
+// No parameters.
+// No return value.
 func (room *Room) Signal() {
 	room.mutex.Lock()
 	defer room.mutex.Unlock()
