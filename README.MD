@@ -1,5 +1,7 @@
 # Talksy Unit
 
+[![Go](https://github.com/Talksy-Foundation/talksy-unit/actions/workflows/go.yml/badge.svg)](https://github.com/Talksy-Foundation/talksy-unit/actions/workflows/go.yml)
+
 > [!TIP]  
 > Single Forwarding Unit for Talksy conferencing service.
 
