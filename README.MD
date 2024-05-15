@@ -52,10 +52,12 @@ type Peer struct {
 ```
 
 ### Room
+
 > [!NOTE] The Room structure represents the room object that manages the connection and media tracks
 > for participants. It implements the Session interface and provides methods for adding and
 > deleting participants, as well as processing media tracks. The Signal method is used for synchronization
 > state of the room with the state of all participants.
+
 ``` go
  type Session interface {
 	JoinRoom(id string)
@@ -78,10 +80,12 @@ type Room struct {
 ```
 
 ### RoomManager
+
 > [!NOTE]   The RoomManager structure is a coordinator for managing rooms (Room). Implements
 > Lobby interface and provides methods for creating, deleting rooms, adding and removing users
 > from the room. The ObtainEvent method is used to handle events from WebSocket such as attach
 > to the room, disconnecting, transmitting proposals and responses, and ICE candidates.
+
 ``` go
 type Lobby interface {
 	CreateRoom(id string)
@@ -105,10 +109,11 @@ Trickle ICE is the process of sharing addresses as soon as they are gathered. Th
 ![ICE](https://i.vimeocdn.com/video/611350196-56fc3656cd8c8fa580d154012b92e26edb9e7fcda4fcd53f9cc4ce04d1a22adf-d)
 
 ### Re-negotiation
-> Renegotiation in the Twenties WebRTC Represents Process Changes
-connection parameters between participants in a communication session. This may include
-includes adding or removing media streams, changing codecs, as well as
-security options such as the use of encryption.
+
+> [!TIP]  Renegotiation in the Twenties WebRTC Represents Process Changes
+> connection parameters between participants in a communication session. This may include
+> includes adding or removing media streams, changing codecs, as well as
+> security options such as the use of encryption.
 
 The renegotiation process is usually initiated by one of the session participants,
 who wants to make changes to the present connection. This can lead to
