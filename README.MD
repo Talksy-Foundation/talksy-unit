@@ -117,8 +117,8 @@ quality transfer or connection of a new device.
 
 ## Setup
 ```bash
-docker build -t <your image name>
-docker run -p 8080:8080 <your image name>
+docker build -t talksy-unit:1.0.0
+docker run -p 8080:8080 -d talksy-unit:1.0.0
 ```
 
 ### Testing:
