@@ -95,8 +95,34 @@ func main() {
 		})
 	}
 
+	localIp, _ := sfu.GetLocalIp()
+	iceServers := []webrtc.ICEServer{
+		{
+			URLs: []string{
+				"stun:stun.l.google.com:19302",
+				"stun:stun1.l.google.com:19302",
+				"stun:stun2.l.google.com:19302",
+				"stun:stun3.l.google.com:19302",
+				"stun:stun4.l.google.com:19302",
+				// "stun:coturn.srv1.tuchacloud.ru:5349",
+			},
+		},
+		{
+			URLs:           []string{"turn:" + localIp.String() + ":3478", "stun:" + localIp.String() + ":3478"},
+			Username:       "user",
+			Credential:     "pass",
+			CredentialType: webrtc.ICECredentialTypePassword,
+		},
+		// {
+		// 	URLs:           []string{"turn:coturn.srv1.tuchacloud.ru:3478?transport=udp"},
+		// 	Username:       "test123",
+		// 	Credential:     "test",
+		// 	CredentialType: webrtc.ICECredentialTypePassword,
+		// },
+	}
+
 	// create room manager first before create new room
-	roomManager := sfu.NewManager(ctx, "server-name-here", sfuOpts)
+	roomManager := sfu.NewManager(ctx, "talksy-main-server", sfuOpts)
 
 	defaultRoom, _ := roomManager.NewRoom("default", "default", sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
 	// multiple room can be created by calling this API endpoint
@@ -114,21 +140,9 @@ func main() {
 	})
 
 	fakeClientCount := 0
-	localIp, _ := sfu.GetLocalIp()
+
 	// turnServer := sfu.StartTurnServer(ctx, localIp.String())
 	// defer turnServer.Close()
-
-	iceServers := []webrtc.ICEServer{
-		{
-			URLs: []string{"stun:stun.l.google.com:19302"},
-		},
-		{
-			URLs:           []string{"turn:" + localIp.String() + ":3478", "stun:" + localIp.String() + ":3478"},
-			Username:       "user",
-			Credential:     "pass",
-			CredentialType: webrtc.ICECredentialTypePassword,
-		},
-	}
 
 	for i := 0; i < fakeClientCount; i++ {
 		// create a fake client
