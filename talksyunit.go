@@ -98,15 +98,20 @@ func main() {
 	// create room manager first before create new room
 	roomManager := sfu.NewManager(ctx, "server-name-here", sfuOpts)
 
-	// generate a new room id. You can extend this example into a multiple room by use this in it's own API endpoint
-	roomID := roomManager.CreateRoomID()
-	roomName := "test-room"
-
-	// create new room
-	roomsOpts := sfu.DefaultRoomOptions()
-	roomsOpts.Bitrates.InitialBandwidth = 1_000_000
-	// roomsOpts.PLIInterval = 3 * time.Second
-	defaultRoom, _ := roomManager.NewRoom(roomID, roomName, sfu.RoomTypeLocal, roomsOpts)
+	defaultRoom, _ := roomManager.NewRoom("default", "default", sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
+	// multiple room can be created by calling this API endpoint
+	http.HandleFunc("/create_room", func(w http.ResponseWriter, r *http.Request) {
+		roomID := roomManager.CreateRoomID()
+		roomName := r.URL.Query().Get("name")
+		if roomName == "" {
+			roomName = roomID
+		}
+		roomsOpts := sfu.DefaultRoomOptions()
+		roomsOpts.Bitrates.InitialBandwidth = 1_000_000
+		// roomsOpts.PLIInterval = 3 * time.Second
+		roomManager.NewRoom(roomID, roomName, sfu.RoomTypeLocal, roomsOpts)
+		fmt.Fprintf(w, "room_id: %s, room_name: %s", roomID, roomName)
+	})
 
 	fakeClientCount := 0
 	localIp, _ := sfu.GetLocalIp()
@@ -147,7 +152,17 @@ func main() {
 		if conn.Request().URL.Query().Get("debug") != "" {
 			isDebug = true
 		}
-		go clientHandler(isDebug, conn, messageChan, defaultRoom)
+		if conn.Request().URL.Query().Get("room_id") != "" {
+			roomID := conn.Request().URL.Query().Get("room_id")
+			room, _ := roomManager.GetRoom(roomID)
+			if room == nil {
+				room, _ = roomManager.NewRoom(roomID, roomID, sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
+			}
+			go clientHandler(isDebug, conn, messageChan, room)
+		} else {
+			go clientHandler(isDebug, conn, messageChan, defaultRoom)
+		}
+
 		reader(conn, messageChan)
 	}))
 
