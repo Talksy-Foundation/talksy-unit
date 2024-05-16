@@ -127,6 +127,18 @@ for various reasons such as adding a new component, changing
 quality transfer or connection of a new device.
 
 ## Setup
+
+```bash
+$Env:TURN_ENABLED="TRUE"
+go run talksyunit.go
+```
+
+1. Open the browser to open the client.
+2. Click the Start button to start the WebRTC connection.
+3. Open another browser tab http://localhost:8000 to start a different client.
+4. Click the Start button to start the WebRTC connection, you should see the video stream from the first client.
+5. Repeat the steps above to add more clients.
+
 ```bash
 docker build -t talksy-unit:1.0.0
 docker run -p 8080:8080 -d talksy-unit:1.0.0
@@ -139,3 +151,4 @@ docker run -p 8080:8080 -d talksy-unit:1.0.0
 ### References:
 
 * https://webrtcforthecurious.com/
+* https://github.com/inlivedev/sfu/blob/main/examples/http-websocket/main.go
