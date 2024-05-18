@@ -26,6 +26,35 @@ scalable solution.
 
 ## Structure
 
+
+```go
+type Request struct {
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
+}
+
+type Respose struct {
+	Status bool        `json:"status"`
+	Type   string      `json:"type"`
+	Data   interface{} `json:"data"`
+}
+
+type VAD struct {
+	SSRC     uint32                                `json:"ssrc"`
+	TrackID  string                                `json:"track_id"`
+	StreamID string                                `json:"stream_id"`
+	Packets  []voiceactivedetector.VoicePacketData `json:"packets"`
+}
+
+type AvailableTrack struct {
+	ClientID   string `json:"client_id"`
+	ClientName string `json:"client_name"`
+	TrackID    string `json:"track_id"`
+	StreamID   string `json:"stream_id"`
+	Source     string `json:"source"`
+}
+```
+
 ### Peer
 
 > [!NOTE]  
@@ -127,6 +156,29 @@ for various reasons such as adding a new component, changing
 quality transfer or connection of a new device.
 
 ## Setup
+
+### GitHub Personal Access Token
+In order for Go to access the private repository, a Personal Access Token from GitHub will be needed. You can create an access token from the GitHub settings: https://github.com/settings/tokens. Give the token a description and select the “repo” scope.
+
+### Configure Go with Personal Access Token
+Once you have your access token, you’ll need to configure Go to use it when trying to access the private repository. You can do this by setting the GOPRIVATE environment variable to the hostname of the repository, and GONOPROXY variable to localhost. Finally set the global git config to use the token.
+
+```sh
+export GOPRIVATE=github.com/Talksy-Foundation/sfu
+export GONOPROXY=localhost
+export GITHUB_ACCESS_TOKEN=<your-token>
+
+$Env:GOPRIVATE="github.com/Talksy-Foundation/sfu"
+$Env:GONOPROXY="localhost"
+$Env:GITHUB_ACCESS_TOKEN="<your-token>"
+
+git config --global url."https://$GITHUB_ACCESS_TOKEN:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+
+go get github.com/Talksy-Foundation/sfu
+
+# Paste <your-token>
+
+```
 
 ```bash
 $Env:TURN_ENABLED="TRUE"

@@ -1,7 +1,6 @@
 package main
 
 import (
-	// ws "talksy_unit/ws_server"
 	"context"
 	"encoding/json"
 	"errors"
@@ -14,11 +13,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Talksy-Foundation/sfu"
+	"github.com/Talksy-Foundation/sfu/pkg/fakeclient"
+	"github.com/Talksy-Foundation/sfu/pkg/interceptors/voiceactivedetector"
+	"github.com/Talksy-Foundation/sfu/pkg/networkmonitor"
 	"github.com/golang/glog"
-	"github.com/inlivedev/sfu"
-	"github.com/inlivedev/sfu/pkg/fakeclient"
-	"github.com/inlivedev/sfu/pkg/interceptors/voiceactivedetector"
-	"github.com/inlivedev/sfu/pkg/networkmonitor"
 	"github.com/pion/webrtc/v3"
 	"golang.org/x/net/websocket"
 )
@@ -72,7 +71,6 @@ const (
 //
 // No parameters.
 func main() {
-	// ws.StartServer()
 	flag.Set("logtostderr", "true")
 	flag.Set("stderrthreshold", "INFO")
 
