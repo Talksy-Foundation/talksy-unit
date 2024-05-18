@@ -16,9 +16,6 @@ scalable solution.
 
 ## Table Of Contents
 1. [Structure](#structure)
-    - [Peer](#peer)
-    - [Room](#room)
-    - [RoomManager](#roommanager)
 2. [Features](#features)
    - [Trickle ICE](#trickle-ice) 
    - [Renegotiation](#re-negotiation)
@@ -55,63 +52,6 @@ type AvailableTrack struct {
 }
 ```
 
-### Peer
-
-> [!NOTE]  
-> The Peer structure is an implementation of the PeerInterface interface and is used
-> to manage the WebRTC connection, process offers and answers, and
-> adding and deleting remote media tracks. Each Peer instance is associated with a unique identifier (id)
-> and provides secure multithreaded communication using a mutex.
-
-``` go
-type PeerInterface interface {
-    SetSocket(ws_conn *websocket.Conn)
-    AddRemoteTrack(track *webrtc.TrackRemote)
-    RemoveRemoteTrack(track *webrtc.TrackRemote)
-    SetPeerConnection(conn *webrtc.PeerConnection)
-    ReactOnOffer(offer webrtc.SessionDescription)
-}
-```
-``` go
-type Peer struct {
-	id         string
-	connection *webrtc.PeerConnection
-	streams    map[string]*webrtc.TrackRemote
-	mutex      sync.RWMutex
-	socket     *websocket.Conn
-}
-```
-
-### Room
-
-> [!NOTE] 
-> The Room structure represents the room object that manages the connection and media tracks
-> for participants. It implements the Session interface and provides methods for adding and
-> deleting participants, as well as processing media tracks. The Signal method is used for synchronization
-> state of the room with the state of all participants.
-
-``` go
- type Session interface {
-	JoinRoom(id string)
-	AddPeer(peer *Peer)
-	RemovePeer(peer_id string)
-	AddTrack(track *webrtc.TrackRemote)
-	RemoveTrack(track *webrtc.TrackRemote)
-	SendAnswer(message webrtc.SessionDescription, peer_id string)
-	Signal()
-}
-
-```
-``` go
-type Room struct {
-	id     string
-	mutex  sync.RWMutex
-	peers  map[string]*Peer
-	tracks map[string]*webrtc.TrackLocalStaticRTP
-} 
-```
-
-### RoomManager
 
 > [!NOTE]   
 > The RoomManager structure is a coordinator for managing rooms (Room). Implements
