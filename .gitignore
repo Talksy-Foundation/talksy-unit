@@ -4,4 +4,4 @@
 .client
 .vendor
 .env
-.bin
+bin
