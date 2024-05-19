@@ -135,7 +135,7 @@ func main() {
 
 	}
 
-	localIp, _ := sfu.GetLocalIp()
+	// localIp, _ := sfu.GetLocalIp()
 	iceServers := []webrtc.ICEServer{
 		{
 			URLs: []string{
