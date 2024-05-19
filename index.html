@@ -157,16 +157,20 @@
 
         const startWs = async () => {
             let debug = false
+            let dev = false
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('debug')) {
                 debug = true
+            }
+            if (urlParams.has('dev')) {
+                dev = true
             }
 
             if (urlParams.has('disablered')) {
                 red = false
             }
 
-            ws = new WebSocket(`${debug ? 'ws' : 'wss'}://${window.location.host}/${debug ? 'ws' : 'wss'}?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
+            ws = new WebSocket(`${dev ? 'ws' : 'wss'}://${window.location.host}/${dev ? 'ws' : 'wss'}?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
             const promise = new Promise((resolve, reject) => {
                 ws.onopen = function () {
                     resolve()

@@ -131,11 +131,11 @@ func main() {
 			Credential:     "pass",
 			CredentialType: webrtc.ICECredentialTypePassword,
 		})
-		log.Printf("Turn Server on http://%s ...", ipAddr)
+		log.Printf("Turn Server on http://%s:3478 ...", ipAddr)
 
 	}
 
-	// localIp, _ := sfu.GetLocalIp()
+	localIp, _ := sfu.GetLocalIp()
 	iceServers := []webrtc.ICEServer{
 		{
 			URLs: []string{
@@ -149,7 +149,12 @@ func main() {
 		},
 		{
 			// URLs:           []string{"turn:" + localIp.String() + ":3478", "stun:" + localIp.String() + ":3478"},
-			URLs:           []string{"turn:" + ipAddr + ":3478", "stun:" + ipAddr + ":3478"},
+			URLs: []string{
+				"turn:" + localIp.String() + ":3478",
+				"stun:" + localIp.String() + ":3478",
+				"turn:" + ipAddr + ":3478",
+				"stun:" + ipAddr + ":3478",
+			},
 			Username:       "user",
 			Credential:     "pass",
 			CredentialType: webrtc.ICECredentialTypePassword,

@@ -198,9 +198,9 @@ $Env:PORT=8080
 go run talksy_unit.go
 ```
 
-1. Open the browser `http://localhost:8080/?room_id=111&debug=true` to open the client.
+1. Open the browser `http://localhost:8080/?room_id=111&debug=true&dev=1` to open the client.
 2. Click the Start button to start the WebRTC connection.
-3. Open another browser tab `http://localhost:8080/?room_id=111&debug=true` to start a different client.
+3. Open another browser tab `http://localhost:8080/?room_id=111&debug=true&dev=1` to start a different client.
 4. Click the Start button to start the WebRTC connection, you should see the video stream from the first client.
 5. Repeat the steps above to add more clients.
 6. Change `room_id` to create new room
@@ -284,7 +284,7 @@ The background process will now start and run independently as a system service.
 
 ```bash
 sudo docker build -t talksy-unit:1.0.0 . && \
-sudo docker run -p 8121:8080 -e TURN_ENABLED=TRUE -d talksy-unit:1.0.0
+sudo docker run -p 8121:8080 -p 3478:3478 -e TURN_ENABLED=TRUE -d talksy-unit:1.0.0
 ```
 
 #### WSS
