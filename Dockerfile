@@ -5,6 +5,7 @@ WORKDIR /app
 COPY . .
 COPY vendor ./vendor
 
+
 RUN go build -mod vendor -o main talksy_unit.go
 
 # RUN Stage
