@@ -982,6 +982,17 @@
     <header>
         <h1>Talksy Unit</h1>
         <p>Add `/?room_id=111` to the URL to join a room</p>
+        <input id="copy-url" type="text" value="/?room_id=111" readonly>
+        <button onclick="copyToClipboard('#copy-url')">Copy URL</button>
+        <input id="copy-debug-url" type="text" value="/?room_id=111&debug=true&dev=1" readonly>
+        <button onclick="copyToClipboard('#copy-debug-url')">Copy DEBUG URL</button>
+        <script>
+            function copyToClipboard(element) {
+                const el = document.querySelector(element);
+                el.select();
+                document.execCommand('copy');
+            }
+        </script>
     </header>    
     <main>
     </main>

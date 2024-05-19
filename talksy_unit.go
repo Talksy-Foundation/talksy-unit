@@ -122,11 +122,11 @@ func main() {
 
 	_, turnEnabled := os.LookupEnv("TURN_ENABLED")
 	if turnEnabled {
-		// sfu.StartTurnServer(ctx, "127.0.0.1")
-		sfu.StartTurnServer(ctx, ipAddr)
+		sfu.StartTurnServer(ctx, "127.0.0.1")
+		// sfu.StartTurnServer(ctx, ipAddr)
 		sfuOpts.IceServers = append(sfuOpts.IceServers, webrtc.ICEServer{
-			// URLs:           []string{"turn:127.0.0.1:3478"},
-			URLs:           []string{"turn:" + ipAddr + ":3478"},
+			URLs: []string{"turn:127.0.0.1:3478"},
+			// URLs:           []string{"turn:" + ipAddr + ":3478"},
 			Username:       "user",
 			Credential:     "pass",
 			CredentialType: webrtc.ICECredentialTypePassword,
