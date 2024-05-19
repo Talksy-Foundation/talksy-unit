@@ -144,11 +144,11 @@ quality transfer or connection of a new device.
 
 ### GitHub Personal Access Token
 
-> ![NOTE]
+> [!NOTE]
 > In order for Go to access the private repository, a Personal Access Token from GitHub will be needed. You can create an access token from the GitHub settings: https://github.com/settings/tokens. Give the token a description and select the “repo” scope.
 
 ### Configure Go with Personal Access Token
-> ![NOTE]
+> [!NOTE]
 > Once you have your access token, you’ll need to configure Go to use it when trying to access the private repository. You can do this by setting the `GOPRIVATE` environment variable to the hostname of the repository, and `GONOPROXY` variable to localhost. Finally set the global git config to use the token.
 
 ### Development:
