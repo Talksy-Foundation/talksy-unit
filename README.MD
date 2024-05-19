@@ -143,6 +143,8 @@ quality transfer or connection of a new device.
 > ![NOTE]
 > Once you have your access token, you’ll need to configure Go to use it when trying to access the private repository. You can do this by setting the `GOPRIVATE` environment variable to the hostname of the repository, and `GONOPROXY` variable to localhost. Finally set the global git config to use the token.
 
+### Development:
+
 Unix:
 ```sh
 export GOPRIVATE=github.com/Talksy-Foundation/sfu
@@ -185,12 +187,23 @@ docker run -p 8080:8000 -d talksy-unit:1.0.0
 
 * https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
 
-### Swagger UI:
+<!-- ### Swagger UI:
 
 ```sh
 swag init -g talksyunit.go
 swag fmt
+``` -->
+
+### Production:
+
+```sh
+$Env:GOOS="linux"; $Env:GOARCH="amd64"; $Env:TURN_ENABLED="TRUE"
+go build -o bin/talksy-unit-amd64-linux talksyunit.go
+
+sudo chown 755 talksy-unit-amd64-linux
+./talksy-unit-amd64-linux
 ```
+
 
 ### References:
 
