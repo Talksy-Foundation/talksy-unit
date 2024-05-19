@@ -186,8 +186,10 @@ go run talksy_unit.go
 5. Repeat the steps above to add more clients.
 6. Change `room_id` to create new room
 
+Docker:
+
 ```bash
-docker build -t talksy-unit:1.0.0
+docker build -t talksy-unit:1.0.0 .
 docker run -p 8080:8080 -d talksy-unit:1.0.0
 ```
 
