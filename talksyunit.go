@@ -22,6 +22,12 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+type WebServer interface {
+	statsHandler(w http.ResponseWriter, r *http.Request, room *sfu.Room)
+	reader(conn *websocket.Conn, messageChan chan Request)
+	clientHandler(isDebug bool, conn *websocket.Conn, messageChan chan Request, r *sfu.Room)
+}
+
 type Request struct {
 	Type string      `json:"type"`
 	Data interface{} `json:"data"`
@@ -190,6 +196,14 @@ func main() {
 	}
 }
 
+// statsHandler handles the HTTP request for retrieving statistics of a room.
+//
+// It takes in the following parameters:
+// - w: an http.ResponseWriter object used to write the response.
+// - r: an *http.Request object representing the incoming request.
+// - room: a pointer to an sfu.Room object representing the room for which statistics are requested.
+//
+// This function does not return anything.
 func statsHandler(w http.ResponseWriter, r *http.Request, room *sfu.Room) {
 	stats := room.Stats()
 
@@ -200,6 +214,17 @@ func statsHandler(w http.ResponseWriter, r *http.Request, room *sfu.Room) {
 	_, _ = w.Write([]byte(statsJSON))
 }
 
+// reader is a function that reads messages from a WebSocket connection and sends them to a message channel.
+//
+// It takes two parameters:
+// - conn: a pointer to a websocket.Conn object representing the WebSocket connection.
+// - messageChan: a channel of type Request to which the received messages will be sent.
+//
+// The function runs in a loop until the context is cancelled. It uses a nested loop to continuously read messages from the connection.
+// If an error occurs while decoding a message, it logs the error and continues to the next message.
+// The received messages are sent to the messageChan channel.
+//
+// The function does not return any values.
 func reader(conn *websocket.Conn, messageChan chan Request) {
 	ctx, cancel := context.WithCancel(conn.Request().Context())
 	defer cancel()
@@ -227,6 +252,13 @@ MessageLoop:
 	}
 }
 
+// clientHandler handles a client connection and manages the client's lifecycle.
+//
+// Parameters:
+// - isDebug: a boolean indicating whether debug mode is enabled.
+// - conn: a pointer to a websocket connection.
+// - messageChan: a channel of type Request used for sending requests to the client.
+// - r: a pointer to an sfu.Room object representing the room the client is connected to.
 func clientHandler(isDebug bool, conn *websocket.Conn, messageChan chan Request, r *sfu.Room) {
 	ctx, cancel := context.WithCancel(conn.Request().Context())
 	defer cancel()

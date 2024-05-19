@@ -23,26 +23,83 @@ scalable solution.
 
 ## Structure
 
+### Webserver
+
+```go
+type WebServer interface {
+	statsHandler(w http.ResponseWriter, r *http.Request, room *sfu.Room)
+	reader(conn *websocket.Conn, messageChan chan Request)
+	clientHandler(isDebug bool, conn *websocket.Conn, messageChan chan Request, r *sfu.Room)
+}
+```
+
+* statsHandler handles the HTTP request for retrieving statistics of a room.
+
+* reader is a function that reads messages from a WebSocket connection and sends them to a message channel.
+
+* clientHandler handles a client connection and manages the client's lifecycle.
+
+
+### Request
 
 ```go
 type Request struct {
 	Type string      `json:"type"`
 	Data interface{} `json:"data"`
 }
+```
 
+> [!NOTE]
+> The Request struct in Go defines a structure that represents a request. 
+> It has two fields: `Type` of type `string` and `Data` of type `interface{}`. The `Type` field is tagged with `json:"type"` to indicate that it should be serialized as "type" when the struct is marshaled to JSON. The `Data` field is also tagged with `json:"data"` to indicate that it should be serialized as "data". This struct is commonly used for representing requests in an API.
+
+
+### Respose
+``` go
 type Respose struct {
 	Status bool        `json:"status"`
 	Type   string      `json:"type"`
 	Data   interface{} `json:"data"`
 }
+```
 
+> [!NOTE]
+> Respose is a Go struct that represents a response object. It has three fields:
+> * `Status`: A boolean field that indicates the status of the response.
+> * `Type`: A `string` field that represents the type of the response.
+> * `Data`: An `interface{}` field that can hold any type of data. This field is typically used when the response data can be of various types.
+
+
+### VAD
+
+> [!NOTE]
+> VAD is a data structure that represents a Voice Activity Detection (VAD) object. It contains the following fields:
+> * `SSRC`: An unsigned 32-bit integer that represents a synchronization source identifier (SSRC). This is typically used in multimedia communication protocols like RTP (Real-time Transport Protocol).
+> * `TrackID`: A `string` that represents the ID of a track. In the context of multimedia, a track can refer to an audio or video stream.
+> * `StreamID`: A `string` that represents the ID of a stream. In the context of multimedia, a stream can refer to a collection of audio or video tracks.
+> * `Packets`: A slice of `voiceactivedetector.VoicePacketData` objects. This suggests that the VAD struct is used to hold information about voice packets, likely used in the context of voice activity detection.
+
+```go
 type VAD struct {
 	SSRC     uint32                                `json:"ssrc"`
 	TrackID  string                                `json:"track_id"`
 	StreamID string                                `json:"stream_id"`
 	Packets  []voiceactivedetector.VoicePacketData `json:"packets"`
 }
+```
 
+### AvailableTrack
+
+> [!NOTE]
+> AvailableTrack is a struct that represents a track that is available for a client in a system.
+	It has the following fields:
+>* `ClientID` (string): The ID of the client that owns the track.
+>* `ClientName` (string): The name of the client that owns the track.
+>* `TrackID` (string): The ID of the track.
+>* `StreamID` (string): The ID of the stream that the track belongs to.
+>* `Source` (string): The source of the track.
+
+```go
 type AvailableTrack struct {
 	ClientID   string `json:"client_id"`
 	ClientName string `json:"client_name"`
@@ -52,26 +109,6 @@ type AvailableTrack struct {
 }
 ```
 
-
-> [!NOTE]   
-> The RoomManager structure is a coordinator for managing rooms (Room). Implements
-> Lobby interface and provides methods for creating, deleting rooms, adding and removing users
-> from the room. The ObtainEvent method is used to handle events from WebSocket such as attach
-> to the room, disconnecting, transmitting proposals and responses, and ICE candidates.
-
-``` go
-type Lobby interface {
-	CreateRoom(id string)
-	RemoveRoom(id string)
-	AddUserToRoom(self_id string, room_id string, socket *websocket.Conn)
-	RemoveUserFromRoom(self_id string, room_id string, socket *websocket.Conn)
-}
-```
-``` go
-type RoomManager struct {
-	sessioins map[string]*Room
-}
-```
 
 ## Features
 ### Trickle ICE
@@ -98,26 +135,33 @@ quality transfer or connection of a new device.
 ## Setup
 
 ### GitHub Personal Access Token
-In order for Go to access the private repository, a Personal Access Token from GitHub will be needed. You can create an access token from the GitHub settings: https://github.com/settings/tokens. Give the token a description and select the “repo” scope.
+
+> ![NOTE]
+> In order for Go to access the private repository, a Personal Access Token from GitHub will be needed. You can create an access token from the GitHub settings: https://github.com/settings/tokens. Give the token a description and select the “repo” scope.
 
 ### Configure Go with Personal Access Token
-Once you have your access token, you’ll need to configure Go to use it when trying to access the private repository. You can do this by setting the GOPRIVATE environment variable to the hostname of the repository, and GONOPROXY variable to localhost. Finally set the global git config to use the token.
+> ![NOTE]
+> Once you have your access token, you’ll need to configure Go to use it when trying to access the private repository. You can do this by setting the `GOPRIVATE` environment variable to the hostname of the repository, and `GONOPROXY` variable to localhost. Finally set the global git config to use the token.
 
+Unix:
 ```sh
 export GOPRIVATE=github.com/Talksy-Foundation/sfu
 export GONOPROXY=localhost
 export GITHUB_ACCESS_TOKEN=<your-token>
+```
 
+Windows:
+```sh
 $Env:GOPRIVATE="github.com/Talksy-Foundation/sfu"
 $Env:GONOPROXY="localhost"
 $Env:GITHUB_ACCESS_TOKEN="<your-token>"
+```
 
+```sh
 git config --global url."https://$GITHUB_ACCESS_TOKEN:x-oauth-basic@github.com/".insteadOf "https://github.com/"
 
 go get github.com/Talksy-Foundation/sfu
-
-# Paste <your-token>
-
+# Paste <your-token> when password is requested
 ```
 
 ```bash
