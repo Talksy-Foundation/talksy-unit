@@ -27,4 +27,4 @@ COPY . ./
 
 EXPOSE 8080
 
-CMD [ "./app-amd64-linux" ]
+CMD [ "./talksy-unit-arm64-linux" ]
