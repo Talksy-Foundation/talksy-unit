@@ -3,8 +3,9 @@ FROM golang:1.22 AS builder
 
 WORKDIR /app
 COPY . .
+COPY vendor ./vendor
 
-RUN go build -o main talksyunit.go
+RUN go build -mod vendor -o main talksyunit.go
 
 # RUN Stage
 FROM golang:1.22
