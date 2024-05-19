@@ -106,19 +106,32 @@ func main() {
 
 	defer cancel()
 
+	port := ":8080"
+	if p, ok := os.LookupEnv("PORT"); ok {
+		port = ":" + p
+	}
+	ipAddr := GetOutboundIP().String() + port
+	if _, ok := os.LookupEnv("DEBUG"); ok {
+		ipAddr = "localhost" + port
+	}
+
 	sfuOpts := sfu.DefaultOptions()
 	sfuOpts.EnableMux = true
 	sfuOpts.EnableBandwidthEstimator = true
 
 	_, turnEnabled := os.LookupEnv("TURN_ENABLED")
 	if turnEnabled {
-		sfu.StartTurnServer(ctx, "127.0.0.1")
+		// sfu.StartTurnServer(ctx, "127.0.0.1")
+		sfu.StartTurnServer(ctx, ipAddr)
 		sfuOpts.IceServers = append(sfuOpts.IceServers, webrtc.ICEServer{
-			URLs:           []string{"turn:127.0.0.1:3478"},
+			// URLs:           []string{"turn:127.0.0.1:3478"},
+			URLs:           []string{"turn:" + ipAddr + ":3478"},
 			Username:       "user",
 			Credential:     "pass",
 			CredentialType: webrtc.ICECredentialTypePassword,
 		})
+		log.Printf("Turn Server on http://%s ...", ipAddr)
+
 	}
 
 	localIp, _ := sfu.GetLocalIp()
@@ -236,22 +249,7 @@ func main() {
 		statsHandler(w, r, DefaultRoom)
 	})
 
-	// Get the outbound IP address of the machine and append the port number
-	// to form the IP address.
-	//
-	// Returns:
-	// - string: the IP address in the format "IP:port".
-	port := ":8080"
-	if p, ok := os.LookupEnv("PORT"); ok {
-		port = ":" + p
-	}
-	ipAddr := GetOutboundIP().String() + port
-
 	srv := &http.Server{}
-
-	if _, ok := os.LookupEnv("DEBUG"); ok {
-		ipAddr = "localhost" + port
-	}
 
 	tcpL, err := net.Listen("tcp4", ipAddr)
 	log.Printf("Listening on http://%s ...", ipAddr)
