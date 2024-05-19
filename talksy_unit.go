@@ -106,13 +106,14 @@ func main() {
 
 	defer cancel()
 
+	ipAddr := GetOutboundIP().String()
+	if _, ok := os.LookupEnv("DEBUG"); ok {
+		ipAddr = "localhost"
+	}
+
 	port := ":8080"
 	if p, ok := os.LookupEnv("PORT"); ok {
 		port = ":" + p
-	}
-	ipAddr := GetOutboundIP().String() + port
-	if _, ok := os.LookupEnv("DEBUG"); ok {
-		ipAddr = "localhost" + port
 	}
 
 	sfuOpts := sfu.DefaultOptions()
@@ -147,7 +148,8 @@ func main() {
 			},
 		},
 		{
-			URLs:           []string{"turn:" + localIp.String() + ":3478", "stun:" + localIp.String() + ":3478"},
+			// URLs:           []string{"turn:" + localIp.String() + ":3478", "stun:" + localIp.String() + ":3478"},
+			URLs:           []string{"turn:" + ipAddr + ":3478", "stun:" + ipAddr + ":3478"},
 			Username:       "user",
 			Credential:     "pass",
 			CredentialType: webrtc.ICECredentialTypePassword,
@@ -251,8 +253,8 @@ func main() {
 
 	srv := &http.Server{}
 
-	tcpL, err := net.Listen("tcp4", ipAddr)
-	log.Printf("Listening on http://%s ...", ipAddr)
+	tcpL, err := net.Listen("tcp4", ipAddr+port)
+	log.Printf("Listening on http://%s ...", ipAddr+port)
 	srv.Serve(tcpL)
 
 	// err := http.ListenAndServe(":8080", nil)

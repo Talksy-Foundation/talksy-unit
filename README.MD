@@ -283,7 +283,7 @@ The background process will now start and run independently as a system service.
 #### Docker:
 
 ```bash
-sudo docker build -t talksy-unit:1.0.0 . &&
+sudo docker build -t talksy-unit:1.0.0 . && \
 sudo docker run -p 8121:8080 -e TURN_ENABLED=TRUE -d talksy-unit:1.0.0
 ```
 
