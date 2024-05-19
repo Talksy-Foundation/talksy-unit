@@ -168,7 +168,7 @@ go get github.com/Talksy-Foundation/sfu
 
 ```bash
 $Env:TURN_ENABLED="TRUE"
-go run talksyunit.go
+go run talksy_unit.go
 ```
 
 1. Open the browser `http://localhost:8000/?room_id=1111` to open the client.
@@ -190,7 +190,7 @@ docker run -p 8080:8000 -d talksy-unit:1.0.0
 <!-- ### Swagger UI:
 
 ```sh
-swag init -g talksyunit.go
+swag init -g talks_yunit.go
 swag fmt
 ``` -->
 
@@ -198,7 +198,7 @@ swag fmt
 
 ```sh
 $Env:GOOS="linux"; $Env:GOARCH="amd64"; $Env:TURN_ENABLED="TRUE"
-go build -o bin/talksy-unit-amd64-linux talksyunit.go
+go build -o bin/talksy-unit-amd64-linux talksy_unit.go
 
 sudo chown 755 talksy-unit-amd64-linux
 ./talksy-unit-amd64-linux
