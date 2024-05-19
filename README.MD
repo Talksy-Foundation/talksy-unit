@@ -25,11 +25,7 @@ scalable solution.
 
 ### Webserver
 
-> [!NOTE]
-> The WebServer interface defines three methods:
-> * `statsHandler(w http.ResponseWriter, r *http.Request, room *sfu.Room)`: This method handles the HTTP request for retrieving statistics of a room. It takes in the response writer, request, and a pointer to an `sfu.Room` object and writes the statistics as a JSON response.
-> * `reader(conn *websocket.Conn, messageChan chan Request)`: This method reads messages from a WebSocket connection and sends them to a message channel. It takes a pointer to a `websocket.Conn` object and a channel of type `Request` as parameters. It runs in a loop until the context is cancelled and decodes incoming messages, sending them to the message channel.
-> * `clientHandler(isDebug bool, conn *websocket.Conn, messageChan chan Request, r *sfu.Room)`: This method handles the WebSocket connection for a client. It takes a boolean flag for debugging, a pointer to a `websocket.Conn` object, a channel of type `Request`, and a pointer to an `sfu.Room object` as parameters. It runs in a loop until the context is cancelled and handles incoming messages, performing actions based on the message type.
+The WebServer interface defines methods:
 
 ```go
 type WebServer interface {
@@ -39,6 +35,10 @@ type WebServer interface {
 }
 ```
 
+> [!NOTE]
+> * `statsHandler(w http.ResponseWriter, r *http.Request, room *sfu.Room)`: This method handles the HTTP request for retrieving statistics of a room. It takes in the response writer, request, and a pointer to an `sfu.Room` object and writes the statistics as a JSON response.
+> * `reader(conn *websocket.Conn, messageChan chan Request)`: This method reads messages from a WebSocket connection and sends them to a message channel. It takes a pointer to a `websocket.Conn` object and a channel of type `Request` as parameters. It runs in a loop until the context is cancelled and decodes incoming messages, sending them to the message channel.
+> * `clientHandler(isDebug bool, conn *websocket.Conn, messageChan chan Request, r *sfu.Room)`: This method handles the WebSocket connection for a client. It takes a boolean flag for debugging, a pointer to a `websocket.Conn` object, a channel of type `Request`, and a pointer to an `sfu.Room` objectas parameters. It runs in a loop until the context is cancelled and handles incoming messages, performing actions based on the message type.
 
 ### Request
 
@@ -185,7 +185,16 @@ docker run -p 8080:8000 -d talksy-unit:1.0.0
 
 * https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
 
+### Swagger UI:
+
+```sh
+swag init -g talksyunit.go
+swag fmt
+```
+
 ### References:
 
+* https://book.systemsapproach.org/foundation/requirements.html
 * https://webrtcforthecurious.com/
 * https://github.com/inlivedev/sfu/blob/main/examples/http-websocket/main.go
+

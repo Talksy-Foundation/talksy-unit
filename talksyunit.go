@@ -73,9 +73,30 @@ const (
 	TypeVoiceDetected        = "voice_detected"
 )
 
+var (
+	RoomManager *sfu.Manager
+	DefaultRoom *sfu.Room
+)
+
+//	@title			Swagger SFU Unit API
+//	@version		1.0
+//	@description	This is a SFU Unit.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	support@talksy.tuchacloud.ru
+//	@contact.url	https://talksy.tuchacloud.ru/support
+//	@contact.email	support@talksy.tuchacloud.ru
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		media-unit-1.talksy.tuchacloud.ru
+//	@BasePath	/v2
+
 // main starts the server using the custom wrapper.
 //
 // No parameters.
+
 func main() {
 	flag.Set("logtostderr", "true")
 	flag.Set("stderrthreshold", "INFO")
@@ -126,22 +147,28 @@ func main() {
 	}
 
 	// create room manager first before create new room
-	roomManager := sfu.NewManager(ctx, "talksy-main-server", sfuOpts)
+	RoomManager = sfu.NewManager(ctx, "talksy-main-server", sfuOpts)
 
-	defaultRoom, _ := roomManager.NewRoom("default", "default", sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
+	DefaultRoom, _ = RoomManager.NewRoom("default", "default", sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
+
+	// TODO: Reafactor to transfer this logic to api package
 	// multiple room can be created by calling this API endpoint
 	http.HandleFunc("/create_room", func(w http.ResponseWriter, r *http.Request) {
-		roomID := roomManager.CreateRoomID()
+		roomID := RoomManager.CreateRoomID()
 		roomName := r.URL.Query().Get("name")
+		// idString := r.PathValue("id")
 		if roomName == "" {
 			roomName = roomID
 		}
 		roomsOpts := sfu.DefaultRoomOptions()
 		roomsOpts.Bitrates.InitialBandwidth = 1_000_000
 		// roomsOpts.PLIInterval = 3 * time.Second
-		roomManager.NewRoom(roomID, roomName, sfu.RoomTypeLocal, roomsOpts)
+		RoomManager.NewRoom(roomID, roomName, sfu.RoomTypeLocal, roomsOpts)
 		fmt.Fprintf(w, "room_id: %s, room_name: %s", roomID, roomName)
 	})
+
+	// handlers := RoomManagerWrapper{RoomManager, DefaultRoom}
+	// http.HandleFunc("/create_room", api.CreateRoom)
 
 	fakeClientCount := 0
 
@@ -150,7 +177,7 @@ func main() {
 
 	for i := 0; i < fakeClientCount; i++ {
 		// create a fake client
-		fc := fakeclient.Create(ctx, defaultRoom, iceServers, fmt.Sprintf("fake-client-%d", i), true)
+		fc := fakeclient.Create(ctx, DefaultRoom, iceServers, fmt.Sprintf("fake-client-%d", i), true)
 
 		fc.Client.OnTracksAdded(func(addedTracks []sfu.ITrack) {
 			setTracks := make(map[string]sfu.TrackType, 0)
@@ -172,20 +199,20 @@ func main() {
 		}
 		if conn.Request().URL.Query().Get("room_id") != "" {
 			roomID := conn.Request().URL.Query().Get("room_id")
-			room, _ := roomManager.GetRoom(roomID)
+			room, _ := RoomManager.GetRoom(roomID)
 			if room == nil {
-				room, _ = roomManager.NewRoom(roomID, roomID, sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
+				room, _ = RoomManager.NewRoom(roomID, roomID, sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
 			}
 			go clientHandler(isDebug, conn, messageChan, room)
 		} else {
-			go clientHandler(isDebug, conn, messageChan, defaultRoom)
+			go clientHandler(isDebug, conn, messageChan, DefaultRoom)
 		}
 
 		reader(conn, messageChan)
 	}))
 
 	http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
-		statsHandler(w, r, defaultRoom)
+		statsHandler(w, r, DefaultRoom)
 	})
 
 	log.Print("Listening on http://localhost:8000 ...")
