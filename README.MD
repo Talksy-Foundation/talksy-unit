@@ -287,12 +287,17 @@ sudo docker build -t talksy-unit:1.0.0 . && \
 sudo docker run -p 8121:8080 -p 3478:3478 --expose=49152-65535 -e TURN_ENABLED=TRUE -d talksy-unit:1.0.0
 
 ## Alternatively
-sudo docker run -p 8121:8080 -p 3478:3478  -d talksy-unit:1.0.0
+sudo docker run -p 8121:8080 -p 3478:3478 -d talksy-unit:1.0.0
+sudo docker run -p 8121:8080 -p 3478:3478/udp --expose=49152-65535 -d talksy-unit:1.0.0
 ```
 
 #### WSS
 
 Use certificates to establish `wss` connection and enable `getMediaDevices` work
+
+Testing:
+
+* https://piehost.com/websocket-tester
 
 ### References:
 
