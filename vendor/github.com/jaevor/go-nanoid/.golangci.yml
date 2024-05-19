@@ -1,3 +1,0 @@
-issues:
-  exclude:
-    - "value of `crand.Read` is not checked"
