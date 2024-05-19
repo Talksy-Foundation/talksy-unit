@@ -212,6 +212,26 @@ func main() {
 		reader(conn, messageChan)
 	}))
 
+	http.Handle("/wss", websocket.Handler(func(conn *websocket.Conn) {
+		messageChan := make(chan Request)
+		isDebug := false
+		if conn.Request().URL.Query().Get("debug") != "" {
+			isDebug = true
+		}
+		if conn.Request().URL.Query().Get("room_id") != "" {
+			roomID := conn.Request().URL.Query().Get("room_id")
+			room, _ := RoomManager.GetRoom(roomID)
+			if room == nil {
+				room, _ = RoomManager.NewRoom(roomID, roomID, sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
+			}
+			go clientHandler(isDebug, conn, messageChan, room)
+		} else {
+			go clientHandler(isDebug, conn, messageChan, DefaultRoom)
+		}
+
+		reader(conn, messageChan)
+	}))
+
 	http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsHandler(w, r, DefaultRoom)
 	})

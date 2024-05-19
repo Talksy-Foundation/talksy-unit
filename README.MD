@@ -181,9 +181,9 @@ $Env:PORT=8080
 go run talksy_unit.go
 ```
 
-1. Open the browser `http://localhost:8080/?room_id=1111` to open the client.
+1. Open the browser `http://localhost:8080/?room_id=111&debug=true` to open the client.
 2. Click the Start button to start the WebRTC connection.
-3. Open another browser tab `http://localhost:8080/?room_id=1111` to start a different client.
+3. Open another browser tab `http://localhost:8080/?room_id=111&debug=true` to start a different client.
 4. Click the Start button to start the WebRTC connection, you should see the video stream from the first client.
 5. Repeat the steps above to add more clients.
 6. Change `room_id` to create new room
@@ -208,8 +208,11 @@ swag fmt
 
 ### Production:
 
+#### Build and Deploy
+
+##### AMD64 (x86_64)
 ```sh
-$Env:GOOS="linux"; $Env:GOARCH="amd64"; $Env:TURN_ENABLED="TRUE"
+$Env:GOOS="linux"; $Env:GOARCH="amd64";
 go build -o bin/talksy-unit-amd64-linux talksy_unit.go
 
 scp ./bin/talksy-unit-amd64-linux USER@SERVER:/home/talksy-unit/talksy-unit-amd64-linux
@@ -218,7 +221,13 @@ sudo chmod 755 talksy-unit-amd64-linux
 export PORT=8080 TURN_ENABLED=FALSE ./talksy-unit-amd64-linux 
 ```
 
-Run as system service:
+##### ARM64
+```sh
+$Env:GOOS="linux"; $Env:GOARCH="arm64";
+go build -o bin/talksy-unit-arm64-linux talksy_unit.go
+```
+
+#### Run as system service:
 
 Create a service unit file with a .service extension. This file defines the properties and behaviour of the background process. For example, let's create a file named myprocess.service:
 `sudo nano /etc/systemd/system/talksy-unit.service`
@@ -251,6 +260,17 @@ Start the background process using systemd:
 The background process will now start and run independently as a system service. You can view its status, stop it, or configure it to start automatically on system boot using various systemctl commands.
 
 `sudo netstat -ntlp | grep :8080`
+
+#### Docker:
+
+```bash
+docker build -t talksy-unit:1.0.0 .
+docker run -p 8121:8080 -d talksy-unit:1.0.0
+```
+
+#### WSS
+
+Use certificates to establish `wss` connection and enable `getMediaDevices` work
 
 ### References:
 

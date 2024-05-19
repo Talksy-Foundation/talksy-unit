@@ -166,7 +166,7 @@
                 red = false
             }
 
-            ws = new WebSocket(`ws://${window.location.host}/ws?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
+            ws = new WebSocket(`${debug ? 'ws' : 'wss'}://${window.location.host}/${debug ? 'ws' : 'wss'}?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
             const promise = new Promise((resolve, reject) => {
                 ws.onopen = function () {
                     resolve()
