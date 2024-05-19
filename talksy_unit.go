@@ -227,9 +227,14 @@ func main() {
 	}
 	ipAddr := GetOutboundIP().String() + port
 
-	log.Printf("Listening on http://%s ...", ipAddr)
 	srv := &http.Server{}
+
+	if _, ok := os.LookupEnv("DEBUG"); ok {
+		ipAddr = "localhost" + port
+	}
+
 	tcpL, err := net.Listen("tcp4", ipAddr)
+	log.Printf("Listening on http://%s ...", ipAddr)
 	srv.Serve(tcpL)
 
 	// err := http.ListenAndServe(":8080", nil)

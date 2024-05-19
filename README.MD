@@ -176,12 +176,14 @@ go get github.com/Talksy-Foundation/sfu
 
 ```bash
 $Env:TURN_ENABLED="TRUE"
+$Env:DEBUG="TRUE"
+$Env:PORT=8080
 go run talksy_unit.go
 ```
 
-1. Open the browser `http://localhost:8000/?room_id=1111` to open the client.
+1. Open the browser `http://localhost:8080/?room_id=1111` to open the client.
 2. Click the Start button to start the WebRTC connection.
-3. Open another browser tab `http://localhost:8000/?room_id=1111` to start a different client.
+3. Open another browser tab `http://localhost:8080/?room_id=1111` to start a different client.
 4. Click the Start button to start the WebRTC connection, you should see the video stream from the first client.
 5. Repeat the steps above to add more clients.
 6. Change `room_id` to create new room
@@ -190,7 +192,7 @@ Docker:
 
 ```bash
 docker build -t talksy-unit:1.0.0 .
-docker run -p 8080:8080 -d talksy-unit:1.0.0
+docker run -p 8121:8080 -d talksy-unit:1.0.0
 ```
 
 ### Testing:

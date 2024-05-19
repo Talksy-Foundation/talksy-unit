@@ -301,7 +301,11 @@
                 video: video
             };
 
-            const stream = await navigator.mediaDevices.getUserMedia(constraints)
+            let stream;
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+            } else {
+                alert('getUserMedia() is not supported in your browser. Chrome disables features such as getUserMedia when it comes from an unsecured origin. http://localhost is considered as a secure origin by default, however if you use an origin that does not have an SSL/TLS certificate then Chrome will consider the origin as unsecured and disable getUserMedia.');            }
             const streamid = stream.id.replace('{', '').replace('}', '');
             let container = document.getElementById("container-" + streamid);
             if (!container) {
@@ -317,6 +321,7 @@
                 localVideo.id = "video-" + streamid;
                 localVideo.autoplay = true;
                 localVideo.muted = true;
+                localVideo.controls = true;
                 container.appendChild(localVideo);
             }
 
@@ -342,6 +347,7 @@
                         remoteVideo = document.createElement("video");
                         remoteVideo.id = "video-" + stream.id;
                         remoteVideo.autoplay = true;
+                        remoteVideo.controls = true;
                         container.appendChild(remoteVideo);
                         if (videoObserver != null) {
                             videoObserver.observe(remoteVideo)
@@ -925,6 +931,7 @@
             video.id = "video-" + videoTrack.id;
             video.autoplay = true;
             video.srcObject = stream;
+            video.controls = true;
             container.appendChild(video);
 
             document.querySelector('main').appendChild(container);
