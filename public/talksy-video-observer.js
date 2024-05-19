@@ -1,15 +1,4 @@
 export class TalksyVideoObserver {
-  #lastReportTime;
-
-  #intervalGap;
-
-  #dataChannel;
-
-  #videoElements;
-
-  #resizeObserver;
-
-  #intersectionObserver;
   /**
    * Constructor.
    * @param {RTCDataChannel} dataChannel - Data channel to use for reporting video size
@@ -17,19 +6,62 @@ export class TalksyVideoObserver {
    * @returns {void}
    */
   constructor(dataChannel, intervalGap) {
-    if (typeof intervalGap !== "number") {
-      this.#intervalGap = 1000;
-    } else {
-      this.#intervalGap = intervalGap;
-    }
-    this.#lastReportTime = [];
-
-    this.#dataChannel = dataChannel;
-    this.#videoElements = [];
-    this.#resizeObserver = new ResizeObserver(this.#onResize.bind(this));
-    this.#intersectionObserver = new IntersectionObserver(
-      this.#onIntersection.bind(this)
+    this._lastReportTime = [];
+    this._intervalGap = typeof intervalGap !== "number" ? 1000 : intervalGap;
+    this._dataChannel = dataChannel;
+    this._videoElements = [];
+    this._resizeObserver = new ResizeObserver(this._onResize.bind(this));
+    this._intersectionObserver = new IntersectionObserver(
+        this._onIntersection.bind(this)
     );
+  }
+
+  get lastReportTime() {
+    return this._lastReportTime;
+  }
+
+  set lastReportTime(value) {
+    this._lastReportTime = value;
+  }
+
+  get intervalGap() {
+    return this._intervalGap;
+  }
+
+  set intervalGap(value) {
+    this._intervalGap = value;
+  }
+
+  get dataChannel() {
+    return this._dataChannel;
+  }
+
+  set dataChannel(value) {
+    this._dataChannel = value;
+  }
+
+  get videoElements() {
+    return this._videoElements;
+  }
+
+  set videoElements(value) {
+    this._videoElements = value;
+  }
+
+  get resizeObserver() {
+    return this._resizeObserver;
+  }
+
+  set resizeObserver(value) {
+    this._resizeObserver = value;
+  }
+
+  get intersectionObserver() {
+    return this._intersectionObserver;
+  }
+
+  set intersectionObserver(value) {
+    this._intersectionObserver = value;
   }
 
   /**
@@ -37,7 +69,7 @@ export class TalksyVideoObserver {
    * @param {ResizeObserverEntry[]} entries - Resize observer entries
    * @returns {void}
    */
-  #onResize(entries) {
+  _onResize(entries) {
     entries.forEach((entry) => {
       if (entry.contentBoxSize) {
         const videoTracks = entry.target.srcObject.getVideoTracks();
@@ -46,7 +78,7 @@ export class TalksyVideoObserver {
           const contentBoxSize = entry.contentBoxSize[0];
           const width = contentBoxSize.inlineSize;
           const height = contentBoxSize.blockSize;
-          this.#onVideoSizeChanged(trackid, width, height);
+          this._onVideoSizeChanged(trackid, width, height);
         }
       }
     });
@@ -57,14 +89,14 @@ export class TalksyVideoObserver {
    * @param {IntersectionObserverEntry[]} entries - Intersection observer entries
    * @returns {void}
    */
-  #onIntersection(entries) {
+  _onIntersection(entries) {
     entries.forEach((entry) => {
       const videoTracks = entry.target.srcObject.getVideoTracks();
       if (videoTracks.length > 0) {
         const trackid = videoTracks[0].id;
         const width = entry.isIntersecting ? entry.target.width : 0;
         const height = entry.isIntersecting ? entry.target.height : 0;
-        this.#onVideoSizeChanged(trackid, width, height);
+        this._onVideoSizeChanged(trackid, width, height);
       }
     });
   }
@@ -75,8 +107,8 @@ export class TalksyVideoObserver {
    * @returns {void}
    */
   observe(videoElement) {
-    this.#watchVideoElement(videoElement);
-    this.#videoElements.push(videoElement);
+    this._watchVideoElement(videoElement);
+    this._videoElements.push(videoElement);
   }
 
   /**
@@ -85,8 +117,8 @@ export class TalksyVideoObserver {
    * @returns {void}
    */
   unobserve(videoElement) {
-    this.#intersectionObserver.unobserve(videoElement);
-    this.#resizeObserver.unobserve(videoElement);
+    this._intersectionObserver.unobserve(videoElement);
+    this._resizeObserver.unobserve(videoElement);
   }
 
   /**
@@ -94,9 +126,9 @@ export class TalksyVideoObserver {
    * @param {HTMLVideoElement} videoElement - Video element to watch
    * @returns {void}
    */
-  #watchVideoElement(videoElement) {
-    this.#intersectionObserver.observe(videoElement);
-    this.#resizeObserver.observe(videoElement);
+  _watchVideoElement(videoElement) {
+    this._intersectionObserver.observe(videoElement);
+    this._resizeObserver.observe(videoElement);
   }
 
   /**
@@ -106,17 +138,17 @@ export class TalksyVideoObserver {
    * @param {number} height - Video height
    * @returns {void}
    */
-  #onVideoSizeChanged(id, width, height) {
+  _onVideoSizeChanged(id, width, height) {
     if (
-      id in this.#lastReportTime &&
-      Date.now() - this.#lastReportTime[id] < this.#intervalGap
+      id in this._lastReportTime &&
+      Date.now() - this._lastReportTime[id] < this._intervalGap
     ) {
       return;
     }
 
-    this.#lastReportTime[id] = Date.now();
+    this._lastReportTime[id] = Date.now();
 
-    if (this.#dataChannel.readyState == "open") {
+    if (this._dataChannel.readyState == "open") {
       const data = JSON.stringify({
         type: "video_size",
         data: {
@@ -127,10 +159,10 @@ export class TalksyVideoObserver {
       });
 
       console.log("Sending video size data: ", data);
-      this.#dataChannel.send(data);
+      this._dataChannel.send(data);
     } else {
       const listener = () => {
-        this.#dataChannel.send(
+        this._dataChannel.send(
           JSON.stringify({
             type: "video_size",
             data: {
@@ -141,10 +173,10 @@ export class TalksyVideoObserver {
           })
         );
 
-        this.#dataChannel.removeEventListener("open", listener);
+        this._dataChannel.removeEventListener("open", listener);
       };
 
-      this.#dataChannel.addEventListener("open", listener);
+      this._dataChannel.addEventListener("open", listener);
     }
   }
 }
