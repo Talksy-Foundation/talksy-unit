@@ -26,5 +26,7 @@ WORKDIR /app
 COPY . ./
 
 EXPOSE 8080
+EXPOSE 3478/udp
+EXPOSE 49152-65535/udp
 
 CMD [ "./talksy-unit-arm64-linux" ]
