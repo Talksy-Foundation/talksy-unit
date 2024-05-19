@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -188,7 +189,7 @@ func main() {
 		})
 	}
 
-	fs := http.FileServer(http.Dir("./public"))
+	fs := http.FileServer(http.Dir("./"))
 	http.Handle("/", fs)
 
 	http.Handle("/ws", websocket.Handler(func(conn *websocket.Conn) {
@@ -215,12 +216,39 @@ func main() {
 		statsHandler(w, r, DefaultRoom)
 	})
 
-	log.Print("Listening on http://localhost:8000 ...")
+	// Get the outbound IP address of the machine and append the port number
+	// to form the IP address.
+	//
+	// Returns:
+	// - string: the IP address in the format "IP:port".
+	port := ":8080"
+	if p, ok := os.LookupEnv("PORT"); ok {
+		port = ":" + p
+	}
+	ipAddr := GetOutboundIP().String() + port
 
-	err := http.ListenAndServe(":8000", nil)
+	log.Printf("Listening on http://%s ...", ipAddr)
+	srv := &http.Server{}
+	tcpL, err := net.Listen("tcp4", ipAddr)
+	srv.Serve(tcpL)
+
+	// err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+// Get preferred outbound ip of this machine
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
 }
 
 // statsHandler handles the HTTP request for retrieving statistics of a room.

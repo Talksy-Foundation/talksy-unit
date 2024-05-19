@@ -155,15 +155,15 @@ quality transfer or connection of a new device.
 
 Unix:
 ```sh
-export GOPRIVATE=github.com/Talksy-Foundation/sfu
-export GONOPROXY=localhost
+export GOPRIVATE=github.com/Talksy-Foundation/sfu &&
+export GONOPROXY=localhost &&
 export GITHUB_ACCESS_TOKEN=<your-token>
 ```
 
 Windows:
 ```sh
-$Env:GOPRIVATE="github.com/Talksy-Foundation/sfu"
-$Env:GONOPROXY="localhost"
+$Env:GOPRIVATE="github.com/Talksy-Foundation/sfu" &&
+$Env:GONOPROXY="localhost" &&
 $Env:GITHUB_ACCESS_TOKEN="<your-token>"
 ```
 
@@ -188,7 +188,7 @@ go run talksy_unit.go
 
 ```bash
 docker build -t talksy-unit:1.0.0
-docker run -p 8080:8000 -d talksy-unit:1.0.0
+docker run -p 8080:8080 -d talksy-unit:1.0.0
 ```
 
 ### Testing:
@@ -208,10 +208,45 @@ swag fmt
 $Env:GOOS="linux"; $Env:GOARCH="amd64"; $Env:TURN_ENABLED="TRUE"
 go build -o bin/talksy-unit-amd64-linux talksy_unit.go
 
-sudo chown 755 talksy-unit-amd64-linux
-./talksy-unit-amd64-linux
+scp ./bin/talksy-unit-amd64-linux USER@SERVER:/home/talksy-unit/talksy-unit-amd64-linux
+scp -r ./bin USER@SERVER:/home/talksy-unit/   
+sudo chmod 755 talksy-unit-amd64-linux
+export PORT=8080 TURN_ENABLED=FALSE ./talksy-unit-amd64-linux 
 ```
 
+Run as system service:
+
+Create a service unit file with a .service extension. This file defines the properties and behaviour of the background process. For example, let's create a file named myprocess.service:
+`sudo nano /etc/systemd/system/talksy-unit.service`
+
+In the service unit file, add the necessary configuration. Here's an example:
+
+```bash
+[Unit]
+Description=Talksy Unit Process
+After=network.target
+
+[Service]
+ExecStart=/home/talksy-unit/talksy-unit-amd64-linux
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target
+```
+
+Save the file and exit the text editor.
+Reload systemd to read the new service unit file:
+`sudo systemctl daemon-reload`
+
+Start the background process using systemd:
+`sudo systemctl start talksy-unit`
+
+`sudo systemctl stop talksy-unit`
+
+The background process will now start and run independently as a system service. You can view its status, stop it, or configure it to start automatically on system boot using various systemctl commands.
+
+`sudo netstat -ntlp | grep :8080`
 
 ### References:
 
