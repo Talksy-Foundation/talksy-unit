@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 COPY vendor ./vendor
 
-RUN go build -mod vendor -o main talksyunit.go
+RUN go build -mod vendor -o main talksy_unit.go
 
 # RUN Stage
 FROM golang:1.22
