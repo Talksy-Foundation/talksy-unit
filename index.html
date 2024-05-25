@@ -284,25 +284,25 @@
             document.getElementById("btnStart").disabled = true;
             document.getElementById("btnStartVP9").disabled = true;
 
-            const video = {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                advanced: [{
-                    frameRate: { min: 30 }
-                },
-                { height: { min: 360 } },
-                { width: { min: 720 } },
-                { frameRate: { max: 30 } },
-                { width: { max: 1280 } },
-                { height: { max: 720 } },
-                { aspectRatio: { exact: 1.77778 } }
-                ]
-            };
-
+            // const video = {
+            //     width: { ideal: 1280 },
+            //     height: { ideal: 720 },
+            //     advanced: [{
+            //         frameRate: { min: 30 }
+            //     },
+            //     { height: { min: 360 } },
+            //     { width: { min: 720 } },
+            //     { frameRate: { max: 30 } },
+            //     { width: { max: 1280 } },
+            //     { height: { max: 720 } },
+            //     { aspectRatio: { exact: 1.77778 } }
+            //     ]
+            // };
 
             const constraints = {
                 audio: true,
-                video: video
+                // video: video
+                video: true,
             };
 
             let stream;
@@ -394,8 +394,9 @@
 
             };
 
-            // peerConnection.addTrack(stream.getAudioTracks()[0], stream);
-            // peerConnection.addTrack(stream.getVideoTracks()[0], stream);
+            // send local video
+            peerConnection.addTrack(stream.getAudioTracks()[0], stream);
+            peerConnection.addTrack(stream.getVideoTracks()[0], stream);
 
 
             const audioTcvr = peerConnection.addTransceiver(stream.getAudioTracks()[0], {

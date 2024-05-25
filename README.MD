@@ -288,7 +288,7 @@ sudo docker run -p 8121:8080 -p 3478:3478 --expose=49152-65535 -e TURN_ENABLED=T
 
 ## Alternatively
 sudo docker run -p 8121:8080 -p 3478:3478 -d talksy-unit:1.0.0
-sudo docker run -p 8121:8080 -p 3478:3478/udp --expose=49152-65535 -d talksy-unit:1.0.0
+sudo docker run -p 8121:8080 -p 3478:3478/udp -p 49152:65535/udp -d talksy-unit:1.0.0
 ```
 
 #### WSS
