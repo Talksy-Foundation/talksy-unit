@@ -27,6 +27,7 @@ COPY . ./
 
 EXPOSE 8080
 EXPOSE 3478/udp
+EXPOSE 3478
 EXPOSE 49152-65535/udp
-
+EXPOSE 49152-65535
 CMD [ "./talksy-unit-arm64-linux" ]

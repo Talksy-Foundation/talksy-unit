@@ -179,7 +179,6 @@
             ws = new WebSocket(`${scheme}://${window.location.host}/${scheme}?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
             const promise = new Promise((resolve, reject) => {
                 // ws.onopen = function () {
-                //     console.log(err);
                 //     resolve()
                 // };
                 ws.addEventListener("open", (event) => {
