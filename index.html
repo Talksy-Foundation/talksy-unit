@@ -172,15 +172,23 @@
                 red = false
             }
 
-            ws = new WebSocket(`${dev ? 'ws' : 'wss'}://mu-1.talksy.tuchacloud.ru/${dev ? 'ws' : 'wss'}?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
+            // ws = new WebSocket(`${dev ? 'ws' : 'wss'}://mu-1.talksy.tuchacloud.ru/${dev ? 'ws' : 'wss'}?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
 
-            //ws = new WebSocket(`${dev ? 'ws' : 'wss'}://${window.location.host}/${dev ? 'ws' : 'wss'}?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
+            var scheme = document.location.protocol == "https:" ? "wss" : "ws";
+
+            ws = new WebSocket(`${scheme}://${window.location.host}/${scheme}?${debug ? 'debug=1' : ''}&room_id=${urlParams.get('room_id')}`);
             const promise = new Promise((resolve, reject) => {
                 ws.onopen = function () {
+                    console.log(err);
                     resolve()
                 };
+                ws.addEventListener("open", (event) => {
+                    console.log(err);
+                    resolve()
+                });
 
                 ws.onerror = function (err) {
+                    console.log(err);
                     reject(err)
                 };
             });
@@ -578,7 +586,7 @@
             peerConnection.onicecandidate = function (e) {
                 if (e.candidate != null) {
                     ws.send(JSON.stringify({ type: 'candidate', data: e.candidate.candidate }));
-                    isAllowRenegotiation()
+                    // isAllowRenegotiation()
                 }
             };
 
@@ -587,12 +595,12 @@
                 if (peerConnection.connectionState == "connected") {
                     monitorStats()
                     monitorBw()  
-                    isAllowRenegotiation()
+                    // isAllowRenegotiation()
                 }
               
             };
 
-            isAllowRenegotiation();
+            // isAllowRenegotiation();
         }
 
         const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
