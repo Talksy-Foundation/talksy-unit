@@ -209,7 +209,7 @@ func main() {
 		})
 	}
 
-	fs := http.FileServer(http.Dir("./public"))
+	fs := http.FileServer(http.Dir("./"))
 	http.Handle("/", fs)
 
 	http.Handle("/ws", websocket.Handler(func(conn *websocket.Conn) {
