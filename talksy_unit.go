@@ -91,7 +91,7 @@ var (
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-//	@host		media-unit-1.talksy.tuchacloud.ru
+//	@host		mu-1.talksy.tuchacloud.ru
 //	@BasePath	/v2
 
 // main starts the server using the custom wrapper.
@@ -148,7 +148,6 @@ func main() {
 			},
 		},
 		{
-			// URLs:           []string{"turn:" + localIp.String() + ":3478", "stun:" + localIp.String() + ":3478"},
 			URLs: []string{
 				"turn:" + localIp.String() + ":3478",
 				"stun:" + localIp.String() + ":3478",
@@ -177,7 +176,6 @@ func main() {
 	http.HandleFunc("/create_room", func(w http.ResponseWriter, r *http.Request) {
 		roomID := RoomManager.CreateRoomID()
 		roomName := r.URL.Query().Get("name")
-		// idString := r.PathValue("id")
 		if roomName == "" {
 			roomName = roomID
 		}
@@ -188,13 +186,7 @@ func main() {
 		fmt.Fprintf(w, "room_id: %s, room_name: %s", roomID, roomName)
 	})
 
-	// handlers := RoomManagerWrapper{RoomManager, DefaultRoom}
-	// http.HandleFunc("/create_room", api.CreateRoom)
-
 	fakeClientCount := 0
-
-	// turnServer := sfu.StartTurnServer(ctx, localIp.String())
-	// defer turnServer.Close()
 
 	for i := 0; i < fakeClientCount; i++ {
 		// create a fake client
