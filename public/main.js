@@ -225,21 +225,10 @@ async function start(codec) {
     navigator.mediaDevices = {};
   }
 
-  // Некоторые браузеры частично реализуют свойство mediaDevices, поэтому
-  //мы не можем присвоить ссылку на объект свойству getUserMedia, поскольку
-  //это переопределит существующие свойства. Здесь, просто добавим свойство
-  //getUserMedia , если оно отсутствует.
-
   if (navigator.mediaDevices.getUserMedia === undefined) {
     navigator.mediaDevices.getUserMedia = function (constraints) {
-      // Сначала, если доступно, получим устаревшее getUserMedia
-
       var getUserMedia =
         navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-      //Некоторые браузеры не реализуют его, тогда вернём отменённый промис
-      // с ошибкой для поддержания последовательности интерфейса
-
       if (!getUserMedia) {
         alert(
             "244: getUserMedia() is not implemented in this browser. Chrome disables features such as getUserMedia when it comes from an unsecured origin. http://localhost is considered as a secure origin by default, however if you use an origin that does not have an SSL/TLS certificate then Chrome will consider the origin as unsecured and disable getUserMedia."
@@ -248,9 +237,6 @@ async function start(codec) {
           new Error("getUserMedia is not implemented in this browser")
         );
       }
-
-      // Иначе, обернём промисом устаревший navigator.getUserMedia
-
       return new Promise(function (resolve, reject) {
         getUserMedia.call(navigator, constraints, resolve, reject);
       });
@@ -301,7 +287,7 @@ async function start(codec) {
   if ("srcObject" in localVideo) {
     localVideo.srcObject = stream;
   } else {
-    // dont use in modert browsers
+    // dont use in modern browsers
     localVideo.src = window.URL.createObjectURL(stream);
   }
 
@@ -349,20 +335,16 @@ async function start(codec) {
       if ("srcObject" in remoteVideo) {
         remoteVideo.srcObject = stream;
       } else {
-        // dont use in modert browsers
         remoteVideo.src = window.URL.createObjectURL(stream);
       }
-      //   remoteVideo.srcObject = stream;
 
       stream.onremovetrack = function (e) {
         console.log("onremovetrack", stream, e.track);
         if ("srcObject" in remoteVideo) {
           remoteVideo.srcObject = null;
         } else {
-          // dont use in modern browsers
           remoteVideo.src = null;
         }
-        // remoteVideo.srcObject = null;
         remoteVideo.remove();
         container.remove();
         if (videoObserver != null) {
@@ -563,7 +545,7 @@ async function start(codec) {
     }
   };
 
-  // isAllowRenegotiation();
+  isAllowRenegotiation();
 }
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
@@ -946,10 +928,8 @@ const shareScreen = async () => {
   if ("srcObject" in video) {
     video.srcObject = stream;
   } else {
-    // Dont use in modern browsers
     video.src = window.URL.createObjectURL(stream);
   }
-    //   video.srcObject = stream;
   video.controls = true;
   container.appendChild(video);
 
