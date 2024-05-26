@@ -198,6 +198,13 @@ $Env:PORT=8080
 go run talksy_unit.go
 ```
 
+If you are using this for a development environment:
+
+* Go to: `chrome://flags/#unsafely-treat-insecure-origin-as-secure`
+* Enable `Insecure origins treated as secure`
+* Add the addresses for which you want to ignore this policy
+* Restart chrome
+
 1. Open the browser `http://localhost:8080/?room_id=111&debug=true&dev=1` to open the client.
 2. Click the Start button to start the WebRTC connection.
 3. Open another browser tab `http://localhost:8080/?room_id=111&debug=true&dev=1` to start a different client.

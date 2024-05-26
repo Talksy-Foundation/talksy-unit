@@ -209,7 +209,7 @@ func main() {
 		})
 	}
 
-	fs := http.FileServer(http.Dir("./"))
+	fs := http.FileServer(http.Dir("./public"))
 	http.Handle("/", fs)
 
 	http.Handle("/ws", websocket.Handler(func(conn *websocket.Conn) {
@@ -256,16 +256,40 @@ func main() {
 		statsHandler(w, r, DefaultRoom)
 	})
 
+	// go ListenTCP(ipAddr, port)
 	srv := &http.Server{}
-
 	tcpL, err := net.Listen("tcp4", ipAddr+port)
 	log.Printf("Listening on http://%s ...", ipAddr+port)
 	srv.Serve(tcpL)
-
-	// err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Panic(err)
 	}
+
+	go ListenTLS(ipAddr, port)
+
+	// err := http.ListenAndServe(":8080", nil)
+	// if err != nil {
+	// 	log.Panic(err)
+	// }
+
+}
+
+func ListenTCP(ipAddr string, port string) {
+	srv := &http.Server{}
+	tcpL, err := net.Listen("tcp4", ipAddr+port)
+	log.Printf("Listening on http://%s ...", ipAddr+port)
+	srv.Serve(tcpL)
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+func ListenTLS(ipAddr string, port string) {
+	err := http.ListenAndServeTLS(":443", "server.crt", "server.key", nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
+	log.Printf("Listening on https://%s:443", ipAddr)
 }
 
 // Get preferred outbound ip of this machine
