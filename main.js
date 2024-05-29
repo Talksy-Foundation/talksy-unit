@@ -14,6 +14,8 @@ let internalChannel = null;
 let videoObserver = null;
 let red = true;
 let negotiationNeeded = false;
+let showStats = false;
+const trackStreamIDs = {};
 
 peerConnection.ondatachannel = function (e) {
   console.log("ondatachannel: ", e.channel.label);
@@ -57,11 +59,6 @@ const startWs = async () => {
     ws.onopen = function () {
       resolve();
     };
-    // ws.addEventListener("open", (event) => {
-    //   console.log(event);
-    //   resolve();
-    // });
-
     ws.onerror = function (err) {
       console.log(err);
       reject(err);
@@ -71,67 +68,7 @@ const startWs = async () => {
   ws.onmessage = async function (e) {
     const msg = JSON.parse(e.data);
     try {
-      if (msg.type == "clientid") {
-        clientid = msg.data;
-        document.getElementById("clientid").innerText = "ClientID: " + clientid;
-      } else if (msg.type === "network_condition") {
-        document.getElementById("network").innerText =
-          msg.data == 0 ? "Unstable" : "Stable";
-      } else if (msg.type == "offer") {
-        console.log("client received offer: ", msg.data);
-        await peerConnection.setRemoteDescription(msg.data);
-        var answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        ws.send(JSON.stringify({ type: "answer", data: answer.sdp }));
-        negotiationNeeded = false;
-        console.log("client send answer", answer);
-      } else if (msg.type == "answer") {
-        await peerConnection.setRemoteDescription(msg.data);
-        console.log(
-          "client received answer",
-          peerConnection.currentRemoteDescription
-        );
-        negotiationNeeded = false;
-      } else if (msg.type == "candidate") {
-        await peerConnection.addIceCandidate(msg.data);
-      } else if (msg.type == "tracks_added") {
-        console.log("on tracks added", msg.data);
-        const trackType = {};
-        const tracksAdded = msg.data;
-        Object.keys(tracksAdded).forEach((uid) => {
-          // we suppose to check tracksAdded[key].id and compare it with current track id from  navigator.mediaDevices.getUserMedia() to know the source is media
-          trackType[uid] = "media";
-        });
-
-        ws.send(JSON.stringify({ type: "tracks_added", data: trackType }));
-      } else if (msg.type == "tracks_available") {
-        console.log("on tracks available", msg.data);
-        const subTracks = [];
-        const availableTracks = msg.data;
-        Object.keys(availableTracks).forEach((uid) => {
-          // we suppose to check tracksAdded[key].id and compare it with current track id from  navigator.mediaDevices.getUserMedia() to know the source is media
-          // ClientID string `json:"client_id"`
-          // StreamID string `json:"stream_id"`
-          // TrackID  string `json:"track_id"`
-          // RID      string `json:"rid"`
-          const track = availableTracks[uid];
-          subTracks.push({
-            client_id: track.client_id,
-            track_id: track.id,
-          });
-        });
-
-        console.log("subTracks: ", subTracks);
-
-        ws.send(JSON.stringify({ type: "subscribe_tracks", data: subTracks }));
-      } else if (msg.type == "allow_renegotiation") {
-        const isAllowRenegotiation = msg.data;
-        if (isAllowRenegotiation && negotiationNeeded) {
-          negotiate();
-        }
-      } else if (msg.type == "track_stats") {
-        updateTrackStats(msg.data);
-      }
+      await handleMessage(msg);
     } catch (error) {
       console.log(error);
     }
@@ -141,6 +78,95 @@ const startWs = async () => {
   };
 
   return promise;
+};
+
+// TODO: really stop the ws
+const stopWs = async () => {
+  ws.close();
+  ws = null;
+  document.getElementById("btnStop").disabled = true;
+  document.getElementById("btnStart").disabled = false;
+  document.getElementById("btnStartVP9").disabled = false;
+
+  // stop using camera and sharing screen
+  const constraints = {
+    audio: true,
+    video: true,
+  };
+  const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+  if (localStream) {
+    localStream.getTracks().forEach((track) => track.stop());
+    localStream = null;
+  }
+
+};
+
+const handleMessage = async (msg) => {
+  if (msg.type == "clientid") {
+    clientid = msg.data;
+    document.getElementById("clientid").innerText = "ClientID: " + clientid;
+  } else if (msg.type === "network_condition") {
+    document.getElementById("network").innerText =
+      msg.data == 0 ? "Unstable" : "Stable";
+  } else if (msg.type == "offer") {
+    console.log("client received offer: ", msg.data);
+    await peerConnection.setRemoteDescription(msg.data);
+    var answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    ws.send(JSON.stringify({ type: "answer", data: answer.sdp }));
+    negotiationNeeded = false;
+    console.log("client send answer", answer);
+  } else if (msg.type == "answer") {
+    await peerConnection.setRemoteDescription(msg.data);
+    console.log(
+      "client received answer",
+      peerConnection.currentRemoteDescription
+    );
+    negotiationNeeded = false;
+  } else if (msg.type == "candidate") {
+    await peerConnection.addIceCandidate(msg.data);
+  } else if (msg.type == "tracks_added") {
+    console.log("on tracks added", msg.data);
+    const trackType = {};
+    const tracksAdded = msg.data;
+    Object.keys(tracksAdded).forEach((uid) => {
+      // we suppose to check tracksAdded[key].id and compare it with current track id from  navigator.mediaDevices.getUserMedia() to know the source is media
+      trackType[uid] = "media";
+    });
+
+    ws.send(JSON.stringify({ type: "tracks_added", data: trackType }));
+  } else if (msg.type == "tracks_available") {
+    console.log("on tracks available", msg.data);
+    const subTracks = [];
+    const availableTracks = msg.data;
+    Object.keys(availableTracks).forEach((uid) => {
+      // we suppose to check tracksAdded[key].id and compare it with current track id from  navigator.mediaDevices.getUserMedia() to know the source is media
+      // ClientID string `json:"client_id"`
+      // StreamID string `json:"stream_id"`
+      // TrackID  string `json:"track_id"`
+      // RID      string `json:"rid"`
+      const track = availableTracks[uid];
+      subTracks.push({
+        client_id: track.client_id,
+        track_id: track.id,
+        kind: track.audio,
+        source_type: track.source_type,
+        // is_simulcast: track.is_simulcast,
+      });
+    });
+
+    console.log("subTracks: ", subTracks);
+
+    ws.send(JSON.stringify({ type: "subscribe_tracks", data: subTracks }));
+  } else if (msg.type == "allow_renegotiation") {
+    const isAllowRenegotiation = msg.data;
+    if (isAllowRenegotiation && negotiationNeeded) {
+      negotiate();
+    }
+  } else if (msg.type == "track_stats") {
+    updateTrackStats(msg.data);
+  }
 };
 
 function updateVoiceDetected(vad) {
@@ -168,34 +194,11 @@ function startVP9() {
   start("vp9");
 }
 
-// if (!navigator.mediaDevices?.enumerateDevices) {
-//     console.log("enumerateDevices() not supported.");
-//   } else {
-//     // List cameras and microphones.
-//     navigator.mediaDevices
-//       .enumerateDevices()
-//       .then((devices) => {
-//         devices.forEach((device) => {
-//           console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
-//         });
-//       })
-//       .catch((err) => {
-//         console.error(`${err.name}: ${err.message}`);
-//       });
-//   }
-
 async function start(codec) {
-  await startWs();
+  await startWs();  
+  document.getElementById("btnStop").disabled = false;
   document.getElementById("btnStart").disabled = true;
   document.getElementById("btnStartVP9").disabled = true;
-  // const constraintList = document.querySelector("#constraintList");
-  // const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
-
-  // for (const constraint of Object.keys(supportedConstraints)) {
-  //   const elem = document.createElement("li");
-  //   elem.innerHTML = `<code>${constraint}</code>`;
-  //   constraintList.appendChild(elem);
-  // }
 
   const video = {
     width: { min: 1024, ideal: 1280, max: 1920 },
@@ -231,8 +234,8 @@ async function start(codec) {
         navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       if (!getUserMedia) {
         alert(
-            "244: getUserMedia() is not implemented in this browser. Chrome disables features such as getUserMedia when it comes from an unsecured origin. http://localhost is considered as a secure origin by default, however if you use an origin that does not have an SSL/TLS certificate then Chrome will consider the origin as unsecured and disable getUserMedia."
-          );
+          "244: getUserMedia() is not implemented in this browser. Chrome disables features such as getUserMedia when it comes from an unsecured origin. http://localhost is considered as a secure origin by default, however if you use an origin that does not have an SSL/TLS certificate then Chrome will consider the origin as unsecured and disable getUserMedia."
+        );
         return Promise.reject(
           new Error("getUserMedia is not implemented in this browser")
         );
@@ -242,25 +245,6 @@ async function start(codec) {
       });
     };
   }
-
-//   navigator.mediaDevices
-//     .getUserMedia({ audio: true, video: true })
-//     .then(function (stream) {
-//       var video = document.querySelector("video");
-
-//       if ("srcObject" in video) {
-//         video.srcObject = stream;
-//       } else {
-//         // Не используем в новых браузерах
-//         video.src = window.URL.createObjectURL(stream);
-//       }
-//       video.onloadedmetadata = function (e) {
-//         video.play();
-//       };
-//     })
-//     .catch(function (err) {
-//       console.log(err.name + ": " + err.message);
-//     });
 
   let stream;
   stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -296,19 +280,21 @@ async function start(codec) {
 
     e.streams.forEach((stream) => {
       console.log("ontrack", stream, e.track);
+
       const streamid = stream.id.replace("{", "").replace("}", "");
-      let container = document.getElementById("container-" + streamid);
+
+      let container = document.getElementById("container-" + stream.id);
       if (!container) {
         container = document.createElement("div");
         container.className = "container";
-        container.id = "container-" + streamid;
+        container.id = "container-" + stream.id;
         document.querySelector("main").appendChild(container);
       }
 
-      let remoteVideo = document.getElementById("video-" + streamid);
+      let remoteVideo = document.getElementById("video-" + stream.id);
       if (!remoteVideo) {
         remoteVideo = document.createElement("video");
-        remoteVideo.id = "video-" + streamid;
+        remoteVideo.id = "video-" + stream.id;
         remoteVideo.autoplay = true;
         remoteVideo.controls = true;
         container.appendChild(remoteVideo);
@@ -359,7 +345,7 @@ async function start(codec) {
   // peerConnection.addTrack(stream.getVideoTracks()[0], stream);
 
   const audioTcvr = peerConnection.addTransceiver(stream.getAudioTracks()[0], {
-    direction: "sendonly",
+    direction: "sendrecv",
     streams: [stream],
     sendEncodings: [{ priority: "high" }],
   });
@@ -394,7 +380,6 @@ async function start(codec) {
   const isSvc = document.querySelector("#svc").checked;
   const maxBitrate = document.querySelector("#maxBitrate").value;
 
-  //   console.log("isFirefox", isFirefox);
   if (codec === "vp9" && !isFirefox) {
     let videoTcvr = null;
 
@@ -402,7 +387,7 @@ async function start(codec) {
 
     if (!isSimulcast) {
       videoTcvr = peerConnection.addTransceiver(stream.getVideoTracks()[0], {
-        direction: "sendonly",
+        direction: "sendrecv",
         streams: [stream],
         sendEncodings: [
           {
@@ -413,7 +398,7 @@ async function start(codec) {
       });
     } else {
       videoTcvr = peerConnection.addTransceiver(stream.getVideoTracks()[0], {
-        direction: "sendonly",
+        direction: "sendrecv",
         streams: [stream],
         sendEncodings: [
           {
@@ -464,7 +449,7 @@ async function start(codec) {
     let videoTcvr = null;
     if (!isSimulcast) {
       videoTcvr = peerConnection.addTransceiver(stream.getVideoTracks()[0], {
-        direction: "sendonly",
+        direction: "sendrecv",
         streams: [stream],
         sendEncodings: [
           {
@@ -474,7 +459,7 @@ async function start(codec) {
       });
     } else {
       videoTcvr = peerConnection.addTransceiver(stream.getVideoTracks()[0], {
-        direction: "sendonly",
+        direction: "sendrecv",
         streams: [stream],
         sendEncodings: [
           {
@@ -545,7 +530,7 @@ async function start(codec) {
     }
   };
 
-  isAllowRenegotiation();
+  // isAllowRenegotiation();
 }
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
@@ -571,13 +556,13 @@ const monitorBw = async () => {
       bwController.mid == 0 ||
       bwController.high == 0
     ) {
-      await sleep(5000);
+      await sleep(6000);
       continue;
     }
 
     // const ratio = bwController.available / totalBw;
 
-    await sleep(5000);
+    await sleep(6000);
   }
 };
 
@@ -874,7 +859,7 @@ const shareScreen = async () => {
 
   if (typeof audioTrack != "undefined") {
     tscvAudio = peerConnection.addTransceiver(audioTrack, {
-      direction: "sendonly",
+      direction: "sendrecv",
       streams: [stream],
       sendEncodings: [{ priority: "high" }],
     });
@@ -882,7 +867,7 @@ const shareScreen = async () => {
 
   if (!document.querySelector("#simulcast").checked) {
     tscvVideo = peerConnection.addTransceiver(videoTrack, {
-      direction: "sendonly",
+      direction: "sendrecv",
       streams: [stream],
       sendEncodings: [
         {
@@ -893,7 +878,7 @@ const shareScreen = async () => {
     });
   } else {
     tscvVideo = peerConnection.addTransceiver(videoTrack, {
-      direction: "sendonly",
+      direction: "sendrecv",
       streams: [stream],
       sendEncodings: [
         {
@@ -966,6 +951,7 @@ const negotiate = async () => {
 document.addEventListener("DOMContentLoaded", function (event) {
   document.getElementById("btnStart").onclick = startH264;
   document.getElementById("btnStartVP9").onclick = startVP9;
+  document.getElementById("btnStop").onclick = stopWs;
   document.getElementById("btnShareScreen").onclick = shareScreen;
   document.getElementById("btnStats").onclick = toggleStats;
   document.getElementById("selectQuality").onchange = switchQuality;

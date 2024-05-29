@@ -24,9 +24,10 @@
                 document.execCommand('copy');
             }
         </script>
-    </header>
+    </header>    
     <main>
     </main>
+
     <aside>
         <h3>Outbound Video</h3>
         <p id="clientid"></p>
@@ -35,8 +36,9 @@
     </aside>
 
     <footer>
-        <button id="btnStart">Start H264</button>
-        <button id="btnStartVP9">Start VP9</button>
+        <button id="btnStart">Start Conference [H264]</button>
+        <button id="btnStartVP9">Start Conference [VP9]</button>
+        <!-- <button id="btnStop">Disconnect</button> -->
         <span><input id="simulcast" type="checkbox" value="simulcast">Simulcast</span>
         <span><input id="svc" type="checkbox" value="svc" checked>SVC</span>
         <button id="btnShareScreen">Share Screen</button>
@@ -59,7 +61,6 @@
                 <option value="2000000">2Mbps</option>
             </select>
         </span>
-        <ul id="constraintList">Constraints</ul>
     </footer>
 </body>
 

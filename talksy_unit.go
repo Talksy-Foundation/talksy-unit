@@ -186,7 +186,7 @@ func main() {
 		fmt.Fprintf(w, "room_id: %s, room_name: %s", roomID, roomName)
 	})
 
-	fakeClientCount := 0
+	fakeClientCount := 1
 
 	for i := 0; i < fakeClientCount; i++ {
 		// create a fake client
