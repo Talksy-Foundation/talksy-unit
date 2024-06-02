@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  talksy_unit:
+    image: talksy_unit_img
+    ports:
+      - "8080:8080"
+    hostname: 127.0.0.1

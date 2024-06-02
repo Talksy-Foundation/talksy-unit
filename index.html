@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Talksy Unit</title>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="module" src="main.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Talksy Unit</h1>
+        <p>Add `/?room_id=111` to the URL to join a room</p>
+        <input id="copy-url" type="text" value="/?room_id=111" readonly>
+        <button onclick="copyToClipboard('#copy-url')">Copy URL</button>
+        <input id="copy-debug-url" type="text" value="/?room_id=111&debug=true" readonly>
+        <button onclick="copyToClipboard('#copy-debug-url')">Copy DEBUG URL</button>
+        <script>
+            function copyToClipboard(element) {
+                const el = document.querySelector(element);
+                el.select();
+                document.execCommand('copy');
+            }
+        </script>
+    </header>    
+    <main>
+    </main>
+
+    <aside>
+        <h3>Outbound Video</h3>
+        <p id="clientid"></p>
+        <p>Network: <span id="network">Stable</span></p>
+        <div id="stats-local"></div>
+    </aside>
+
+    <footer>
+        <button id="btnStart">Start Conference [H264]</button>
+        <button id="btnStartVP9">Start Conference [VP9]</button>
+        <button id="btnStop">Disconnect</button>
+        <span><input id="simulcast" type="checkbox" value="simulcast">Simulcast</span>
+        <span><input id="svc" type="checkbox" value="svc" checked>SVC</span>
+        <button id="btnShareScreen">Share Screen</button>
+        <button id="btnStats">Toggle Stats</button>
+        <span><label>Quality</label>
+            <select id="selectQuality">
+                <option selected value="high">high</option>
+                <option value="mid">mid</option>
+                <option value="low">low</option>
+                <option value="none">none</option>
+            </select>
+        </span>
+
+        <span><label>Max Bitrate</label>
+            <select id="maxBitrate">
+                <option value="120000">120Kbps</option>
+                <option value="300000">300Kbps</option>
+                <option value="500000">500Kbps</option>
+                <option value="1000000" selected>1Mbps</option>
+                <option value="2000000">2Mbps</option>
+            </select>
+        </span>
+    </footer>
+</body>
+
+</html>

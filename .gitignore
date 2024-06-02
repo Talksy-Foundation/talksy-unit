@@ -1,0 +1,9 @@
+.idea
+.vscode
+.vs
+.client
+.vendor
+.env
+bin
+
+vendor

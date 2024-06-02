@@ -1,0 +1,8 @@
+.DS_Store
+.idea
+.gitignore
+.vscode
+.vs
+.vendor
+
+bin
