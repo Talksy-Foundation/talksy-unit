@@ -345,7 +345,7 @@ async function start(codec) {
   // peerConnection.addTrack(stream.getVideoTracks()[0], stream);
 
   const audioTcvr = peerConnection.addTransceiver(stream.getAudioTracks()[0], {
-    direction: "sendonly", // maybe sendrecv
+    direction: "sendrecv", // sendonly
     streams: [stream],
     sendEncodings: [{ priority: "high" }],
   });
@@ -387,7 +387,7 @@ async function start(codec) {
 
     if (!isSimulcast) {
       videoTcvr = peerConnection.addTransceiver(stream.getVideoTracks()[0], {
-        direction: "sendonly", // maybe sendrecv or remove
+        direction: "sendrecv", // maybe sendrecv or remove
         streams: [stream],
         sendEncodings: [
           {
@@ -398,7 +398,7 @@ async function start(codec) {
       });
     } else {
       videoTcvr = peerConnection.addTransceiver(stream.getVideoTracks()[0], {
-        direction: "sendonly", // maybe sendrecv
+        direction: "sendrecv", // maybe sendrecv
         streams: [stream],
         sendEncodings: [
           {
@@ -449,7 +449,7 @@ async function start(codec) {
     let videoTcvr = null;
     if (!isSimulcast) {
       videoTcvr = peerConnection.addTransceiver(stream.getVideoTracks()[0], {
-        direction: "sendonly", // maybe sendrecv
+        direction: "sendrecv", // maybe sendrecv
         streams: [stream],
         sendEncodings: [
           {
@@ -459,7 +459,7 @@ async function start(codec) {
       });
     } else {
       videoTcvr = peerConnection.addTransceiver(stream.getVideoTracks()[0], {
-        direction: "sendonly", // maybe sendrecv
+        direction: "sendrecv", // maybe sendrecv
         streams: [stream],
         sendEncodings: [
           {
@@ -859,7 +859,7 @@ const shareScreen = async () => {
 
   if (typeof audioTrack != "undefined") {
     tscvAudio = peerConnection.addTransceiver(audioTrack, {
-      direction: "sendonly", // maybe sendrecv
+      direction: "sendrecv", // maybe sendrecv
       streams: [stream],
       sendEncodings: [{ priority: "high" }],
     });
@@ -867,7 +867,7 @@ const shareScreen = async () => {
 
   if (!document.querySelector("#simulcast").checked) {
     tscvVideo = peerConnection.addTransceiver(videoTrack, {
-      direction: "sendonly", // maybe sendrecv
+      direction: "sendrecv", // maybe sendrecv
       streams: [stream],
       sendEncodings: [
         {
@@ -878,7 +878,7 @@ const shareScreen = async () => {
     });
   } else {
     tscvVideo = peerConnection.addTransceiver(videoTrack, {
-      direction: "sendonly", // maybe sendrecv
+      direction: "sendrecv", // maybe sendrecv
       streams: [stream],
       sendEncodings: [
         {
