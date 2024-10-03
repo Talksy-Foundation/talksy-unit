@@ -169,8 +169,8 @@ export GITHUB_ACCESS_TOKEN=<your-token>
 Windows:
 
 ```sh
-$Env:GOPRIVATE="github.com/Talksy-Foundation/sfu" &&
-$Env:GONOPROXY="localhost" &&
+$Env:GOPRIVATE="github.com/Talksy-Foundation/sfu" 
+$Env:GONOPROXY="localhost" 
 $Env:GITHUB_ACCESS_TOKEN="<your-token>"
 ```
 

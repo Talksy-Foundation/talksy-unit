@@ -11,6 +11,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -19,7 +20,8 @@ import (
 	"github.com/Talksy-Foundation/sfu/pkg/interceptors/voiceactivedetector"
 	"github.com/Talksy-Foundation/sfu/pkg/networkmonitor"
 	"github.com/golang/glog"
-	"github.com/pion/webrtc/v3"
+	"github.com/pion/logging"
+	"github.com/pion/webrtc/v4"
 	"golang.org/x/net/websocket"
 )
 
@@ -117,7 +119,7 @@ func main() {
 	}
 
 	sfuOpts := sfu.DefaultOptions()
-	sfuOpts.EnableMux = true
+	// sfuOpts.EnableMux = true
 	sfuOpts.EnableBandwidthEstimator = true
 
 	_, turnEnabled := os.LookupEnv("TURN_ENABLED")
@@ -171,7 +173,6 @@ func main() {
 
 	DefaultRoom, _ = RoomManager.NewRoom("default", "default", sfu.RoomTypeLocal, sfu.DefaultRoomOptions())
 
-	// TODO: Reafactor to transfer this logic to api package
 	// multiple room can be created by calling this API endpoint
 	http.HandleFunc("/create_room", func(w http.ResponseWriter, r *http.Request) {
 		roomID := RoomManager.CreateRoomID()
@@ -189,9 +190,11 @@ func main() {
 	fakeClientCount := 0
 
 	for i := 0; i < fakeClientCount; i++ {
+		log := logging.LeveledLogger(&logging.DefaultLeveledLogger{})
+		log.Debug("fake-client")
 
-		// panic: no video file
-		fc := fakeclient.Create(ctx, DefaultRoom, iceServers, fmt.Sprintf("fake-client-%d", i), true) // create a fake client
+		// WARN: panic: no video file
+		fc := fakeclient.Create(ctx, log, DefaultRoom, iceServers, fmt.Sprintf("fake-client-%d", i), true) // create a fake client
 
 		fc.Client.OnTracksAdded(func(addedTracks []sfu.ITrack) {
 			setTracks := make(map[string]sfu.TrackType, 0)
@@ -249,22 +252,26 @@ func main() {
 		statsHandler(w, r, DefaultRoom)
 	})
 
-	go ListenTCP(ipAddr, port)
-	srv := &http.Server{}
-	tcpL, err := net.Listen("tcp4", ipAddr+port)
-	log.Printf("Listening on http://%s ...", ipAddr+port)
-	srv.Serve(tcpL)
-	if err != nil {
-		log.Panic(err)
+	switch runtime.GOOS {
+	case "linux":
+		go ListenTCP(ipAddr, port)
+		srv := &http.Server{}
+		tcpL, err := net.Listen("tcp4", ipAddr+port)
+		log.Printf("Listening on http://%s ...", ipAddr+port)
+		srv.Serve(tcpL)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		go ListenTLS(ipAddr, port)
+	case "windows":
+		err := http.ListenAndServe(port, nil)
+		if err != nil {
+			log.Panic(err)
+		}
+	default:
+		log.Panicf("Unsupported OS: %s", runtime.GOOS)
 	}
-
-	go ListenTLS(ipAddr, port)
-
-	// err := http.ListenAndServe(port, nil)
-	// if err != nil {
-	// 	log.Panic(err)
-	// }
-
 }
 
 func ListenTCP(ipAddr string, port string) {
