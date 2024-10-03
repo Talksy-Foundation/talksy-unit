@@ -255,15 +255,8 @@ func main() {
 	switch runtime.GOOS {
 	case "linux":
 		go ListenTCP(ipAddr, port)
-		srv := &http.Server{}
-		tcpL, err := net.Listen("tcp4", ipAddr+port)
-		log.Printf("Listening on http://%s ...", ipAddr+port)
-		srv.Serve(tcpL)
-		if err != nil {
-			log.Panic(err)
-		}
-
 		go ListenTLS(ipAddr, port)
+
 	case "windows":
 		err := http.ListenAndServe(port, nil)
 		if err != nil {
