@@ -11,7 +11,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"runtime"
 	"strconv"
 	"time"
 
@@ -252,18 +251,9 @@ func main() {
 		statsHandler(w, r, DefaultRoom)
 	})
 
-	switch runtime.GOOS {
-	case "linux":
-		go ListenTCP(ipAddr, port)
-		go ListenTLS(ipAddr, port)
-
-	case "windows":
-		err := http.ListenAndServe(port, nil)
-		if err != nil {
-			log.Panic(err)
-		}
-	default:
-		log.Panicf("Unsupported OS: %s", runtime.GOOS)
+	err := http.ListenAndServe(port, nil)
+	if err != nil {
+		log.Panic(err)
 	}
 }
 
